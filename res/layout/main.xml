@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:id="@+id/CameraPreview"
+        android:layout_width="match_parent"
+        android:layout_height="100dip"
+        android:text="blah"/>
+        
+    
+    <LinearLayout
+        android:id="@+id/StatusHeadingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/TextView04"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="---" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/TextView03"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="Region" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/TextView01"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="---" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/TextView05"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="---" >
+        </TextView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/StatusInfoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/state_tv"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="---" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/region_tv"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="Region" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/id_tv"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="---" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/leader_tv"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="---" >
+        </TextView>
+    </LinearLayout>
+    
+    <!--  Camera stuff! -->
+    <LinearLayout
+        android:id="@+id/CameraLaunch"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/camera_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Take a Photo!" />
+
+        <Button
+            android:id="@+id/get1_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 1 Get" />
+        
+        <Button
+            android:id="@+id/get2_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 2 Get" />
+        
+        <Button
+            android:id="@+id/get3_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 3 Get!" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/CameraLaunch2"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:orientation="horizontal" >
+
+        <Button
+            android:id="@+id/cameraPrev_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="My Camera Take" />
+
+        <Button
+            android:id="@+id/get4_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 4 Get" />
+        
+        <Button
+            android:id="@+id/get5_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 5 Get" />
+        
+        <Button
+            android:id="@+id/get6_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 6 Get" />
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/PhotoDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <ImageView
+            android:id="@+id/photoResultView"
+            android:layout_width="wrap_content"
+            android:layout_height="70dip" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/msgList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll" >
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/CountInfoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            android:id="@+id/opcount_tv"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:text="ops: 0" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/successcount_tv"
+            android:layout_width="110dip"
+            android:layout_height="wrap_content"
+            android:text="successes: 0" >
+        </TextView>
+
+        <TextView
+            android:id="@+id/failurecount_tv"
+            android:layout_width="90dip"
+            android:layout_height="wrap_content"
+            android:text="failures: 0" >
+        </TextView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/RegionButtonsLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/region_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number" />
+
+        <Button
+            android:id="@+id/region_button"
+            android:layout_width="90dip"
+            android:layout_height="match_parent"
+            android:text="Set Region" />
+    </LinearLayout>
+
+</LinearLayout>
