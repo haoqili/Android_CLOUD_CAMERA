@@ -53,7 +53,10 @@ public class CameraCloud extends Activity implements LocationListener
 	final static private String TAG = "CameraCloud";
 	//final static String hostname = "ec2-122-248-219-48.ap-southeast-1.compute.amazonaws.com:4212";
 	// final static String hostname = "128.30.87.150:6212"; // laptop ethernet at stata
-	final static String hostname = "50.57.147.82:6212"; // personal
+	// final static String hostname = "50.57.147.82:6212"; // personal
+	//final static String hostname = "hermes5.csail.mit.edu:6212";
+	final static String hostname = "128.30.87.130:6212";
+	
 	public class CloudObject {
 		// Status codes
 		final static int CR_ERROR = 13;
@@ -433,6 +436,12 @@ public class CameraCloud extends Activity implements LocationListener
 			// let the preview work again
 			cameraSurfaceView.camera.startPreview();
 			
+			// check that region is set
+			if ( ((int)myRegion.x < 1) || ((int)myRegion.x > 6)){
+				logMsg("Please SET to a VAILD REGION first before taking picture");
+				return;
+			}
+			
 			logMsg("Picture successfully taken, ORIG BYTE LENGTH = " + picture.length);
 			try {
 				Bitmap orig_bitmap = _bytesToBitmap(picture);
@@ -719,10 +728,15 @@ public class CameraCloud extends Activity implements LocationListener
 		//logMsg("one_long_to_meters = " + one_long_to_meters);
 		
 		// Endpoints on (straight) Mass Ave to calculate theta
-		final double north_west_loc_long = -71.104888;
+		/*final double north_west_loc_long = -71.104888;
 		final double north_west_loc_lat = 42.365944;
 		final double south_east_loc_long = -71.100005;
-		final double south_east_loc_lat = 42.363492;
+		final double south_east_loc_lat = 42.363492;*/
+		final double north_west_loc_long = -71.093881;
+		final double north_west_loc_lat = 42.359644;
+		final double south_east_loc_long = -71.092894;
+		final double south_east_loc_lat = 42.357741;
+
 		double x_diff = Math.abs(south_east_loc_long - north_west_loc_long) * one_long_to_meters * power; // 401.6m
 		//logMsg("x_diff = " + x_diff);
 		double y_diff = Math.abs(north_west_loc_lat - south_east_loc_lat) * one_lat_to_meters * power; // 272.9m
