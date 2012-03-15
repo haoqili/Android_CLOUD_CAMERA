@@ -12,11 +12,9 @@ import java.net.URISyntaxException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.protocol.HTTP;
 import org.json.JSONObject;
 
 import android.app.Activity;
@@ -30,11 +28,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,7 +52,8 @@ public class CameraCloud extends Activity implements LocationListener
 {	
 	final static private String TAG = "CameraCloud";
 	//final static String hostname = "ec2-122-248-219-48.ap-southeast-1.compute.amazonaws.com:4212";
-	final static String hostname = "128.30.87.150:6212";  // echo $HOSTNAME
+	// final static String hostname = "128.30.87.150:6212"; // laptop ethernet at stata
+	final static String hostname = "50.57.147.82:6212"; // personal
 	public class CloudObject {
 		// Status codes
 		final static int CR_ERROR = 13;
@@ -378,22 +379,6 @@ public class CameraCloud extends Activity implements LocationListener
 			Log.i(TAG, "#################");
 			Log.i(TAG, "clicked Camera button");
 			
-			// TODO: Change back to non-debug mode
-			CloudObject co_send = new CloudObject(null);
-			CloudObject co_return;
-			try {
-				co_return = serverRequest(99, 9, 9, co_send);
-				logMsg("RETURN STATUS: " + co_return.status);
-			} catch (ClientProtocolException e) {
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			// END DEBUG
-			
-			/*
 			Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 
 			// credit: http://stackoverflow.com/questions/1910608/android-action-image-capture-intent
@@ -411,7 +396,7 @@ public class CameraCloud extends Activity implements LocationListener
 			Uri _fileUri = Uri.fromFile(_photoFile);
 			cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, _fileUri);
 			// start the Intent:
-			startActivityForResult(cameraIntent, CAMERA_PIC_REQUEST);*/
+			startActivityForResult(cameraIntent, CAMERA_PIC_REQUEST);
 		}
 	};
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -453,7 +438,6 @@ public class CameraCloud extends Activity implements LocationListener
 				ImageView image = (ImageView) findViewById(R.id.photoResultView);
 				
 				logMsg("Show photo from handle my camera take");
-				// TODO: why photo not showing?
 				image.setImageBitmap(new_bitmap);
 				logMsg("Show photo done ");
 				sendClientNewpic(new_bitmap);
@@ -608,7 +592,7 @@ public class CameraCloud extends Activity implements LocationListener
 		CloudObject co_return;
 		logMsg("Trying to get photo from server");
 		try {
-			co_return = serverRequest(CLIENT_DOWNLOAD_PHOTO, (int)myRegion.x, (int)myRegion.y, co_send);
+			co_return = serverRequest(CLIENT_DOWNLOAD_PHOTO, (int)targetRegion, 0, co_send);
 			logMsg("RETURN STATUS: " + co_return.status);
 
 			byte[] photo_bytes = co_return.photo_bytes;
@@ -700,7 +684,7 @@ public class CameraCloud extends Activity implements LocationListener
 		InputStream data = null;
 		String url = String.format("http://" + hostname
                 + "/%d/%d/%d/", client_req_int, x, y);
-		logMsg("url: " + url);
+		logMsg("Server request to url: " + url);
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost httpost = new HttpPost(url);
 
@@ -716,14 +700,6 @@ public class CameraCloud extends Activity implements LocationListener
 		httpost.setEntity(se);
 		httpost.setHeader("Accept", "application/json");
 		httpost.setHeader("Content-type", "application/json");
-		
-		
-		/* Method 2
-		StringEntity entity = new StringEntity(cloudObj_gsonstring, HTTP.UTF_8);
-		entity.setContentType("application/json");
-		httpost.setEntity(entity);
-		*/
-		
 		
 		logMsg("about to execute HTTP POST");
 		HttpResponse response = httpclient.execute(httpost);

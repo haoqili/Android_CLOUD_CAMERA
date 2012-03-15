@@ -47,12 +47,16 @@ def client_upload_photo(x, y):
             # make new key (x, y) and set it to photo_bytes array
             regions[(x,y)] = [request.json["photo_bytes"]]
             print "RETURN OKAY :D:D:D:D"
+            print "Regions is now like: "
+            print regions
             return jsonify({'status': CR_OKAY})
         else:
             print "append to current array"
             # append to current array
             regions[(x,y)].append(request.json["photo_bytes"])
             print "RETURN OKAY :D:D:D:D"
+            print "Regions is now like: "
+            print regions
             return jsonify({'status': CR_OKAY})
     else:
         print "request method not POST :(:(:(:("
@@ -67,35 +71,24 @@ def client_download_photo(x, y):
         print 'request about '+ str(x) + ", " + str(y)
         # require region to exist and only allow current leader to modify
         if not (x,y) in regions.keys():
+            print "Requested region NOT in regions dictionary"
             return jsonify({'status': CR_NO_PHOTO})
         else:
+            print "Requested region IN dictinary"
             # retrieve last element of  photo_bytes array, 
             # i.e. newest photo of this region
+            print "about te return 'photo_bytes' with data: "
+            print regions[(x,y)][-1]
             return jsonify({'photo_bytes': regions[(x,y)][-1]})
     else:
         print 'request method not POST'
         return jsonify({'status': CR_ERROR})
 
-@app.route('/99/<int:x>/<int:y>/', methods=['GET', 'POST'])
-def debugging_mode(x, y):
-    """ save this photo to region (x, y)'s photo array """
-    print "process CLIENT_UPLOAD_PHOTO"
-    if request.method == 'POST':
-        print "request from "+ str(x) + ", " + str(y)
-        # require region to exist and only allow current leader to modify
-        # print "'string' is: ..." + request.json["debugstr"]
-        print "'string' is: ..." + request.json["debugstr"]
-
-        print "RETURN OKAY :D:D:D:D"
-        return jsonify({'status': CR_OKAY})
-    else:
-        print "request method not POST"
-        return jsonify({'status': CR_ERROR})
- 
 
 #########################
 # run
 #########################
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=6212)
-
+    #app.run(host='0.0.0.0', port=6212)
+    # personal server
+    app.run(host='50.57.147.82', port=6212)
