@@ -91,7 +91,7 @@
             android:layout_width="80dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
-            android:text="Take a Photo!" />
+            android:text="none" />
 
         <Button
             android:id="@+id/get1_button"

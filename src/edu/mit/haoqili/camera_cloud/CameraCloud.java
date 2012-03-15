@@ -176,7 +176,7 @@ public class CameraCloud extends Activity implements LocationListener
 		region_button = (Button) findViewById(R.id.region_button);
 		region_button.setOnClickListener(region_button_listener);
 		camera_button = (Button) findViewById(R.id.camera_button);
-		camera_button.setOnClickListener(camera_button_listener);
+		//camera_button.setOnClickListener(camera_button_listener);
 		get1_button = (Button) findViewById(R.id.get1_button);
 		get1_button.setOnClickListener(get1_button_listener);
 		get2_button = (Button) findViewById(R.id.get2_button);
