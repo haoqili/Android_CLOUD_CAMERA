@@ -325,7 +325,9 @@ public class CameraCloud extends Activity implements LocationListener
 	public void onLocationChanged(Location loc) {
 		logMsg(".......... GPS onLocationChanged ...... ");
 		if (loc != null) {
-			checkLocation(loc);
+			//checkLocation(loc);
+			// TODO: using better location??
+			determineLocation(loc, myRegion);
 		} else {
 			logMsg("Null Location");
 		}
@@ -378,7 +380,7 @@ public class CameraCloud extends Activity implements LocationListener
 		public void onClick(View v){
 			Log.i(TAG, "#################");
 			Log.i(TAG, "clicked Camera button");
-			
+
 			Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
 
 			// credit: http://stackoverflow.com/questions/1910608/android-action-image-capture-intent
@@ -462,8 +464,13 @@ public class CameraCloud extends Activity implements LocationListener
 			byte[] photo_bytes = _bitmapToBytes(bitmap);
 			logMsg("BYTE SIZE AFTER COMPRESSION: " + photo_bytes.length);
 			CloudObject co_send = new CloudObject(photo_bytes);
+
+			long t1 = System.currentTimeMillis();
 			CloudObject co_return = serverRequest(CLIENT_UPLOAD_PHOTO, (int)myRegion.x, (int)myRegion.y, co_send);
-			logMsg("RETURN STATUS: " + co_return.status);
+            long latency = System.currentTimeMillis() - t1;
+			logMsg("sendClientNewpic latency = " + latency);
+
+            logMsg("RETURN STATUS: " + co_return.status);
 		} catch (URISyntaxException e) {
 				e.printStackTrace();
 		} catch (IOException e) {
@@ -592,7 +599,12 @@ public class CameraCloud extends Activity implements LocationListener
 		CloudObject co_return;
 		logMsg("Trying to get photo from server");
 		try {
+			
+			long t1 = System.currentTimeMillis();
 			co_return = serverRequest(CLIENT_DOWNLOAD_PHOTO, (int)targetRegion, 0, co_send);
+			long latency = System.currentTimeMillis() - t1;
+			logMsg("request picture latency = " + latency);
+			
 			logMsg("RETURN STATUS: " + co_return.status);
 
 			byte[] photo_bytes = co_return.photo_bytes;
@@ -652,7 +664,7 @@ public class CameraCloud extends Activity implements LocationListener
 	public void checkLocation(Location loc) {
 		if (loc == null)
 			return;
-
+		
 		// round to 5th decimal place (approx 1 meter at equator)
 		long mX = Math.round((loc.getLongitude() * 100000) - minLongitude);
 		long mY = Math.round((loc.getLatitude() * 100000) - minLatitude);
@@ -672,6 +684,97 @@ public class CameraCloud extends Activity implements LocationListener
 		RegionKey newRegion = new RegionKey(rx, 0);
 		if (!newRegion.equals(myRegion))
 			changeRegion(newRegion);
+		
+		
+	}
+	
+	/*
+	 * Region 0 starts at south-east point and 
+	 * increments one by one north-west-wards along Mass Ave.
+	 */
+	public void determineLocation(Location loc, RegionKey prevRegion){
+		// TODO: make this work with Y as well
+		// currently determining region only depends on X
+		
+		logMsg("INSIDE DETERMINELOCATION");
+		logMsg("Loc = " + loc + " Previous Region = " + prevRegion);
+		
+		double locx = loc.getLongitude();
+		double locy = loc.getLatitude();		
+		double power = 100000;
+		
+		// x-width of a rectangular region
+		double region_width = Math.sqrt(Math.pow(Globals.PHONE_RANGE_METERS, 2) - Math.pow(Globals.ROAD_WIDTH_METERS, 2));
+		logMsg("GPS x/long:" + locx + ", GPS y/lat: " + locy + ". Region width in x: " + region_width);
+
+		// X = Longitude, Y = Latitude
+		
+		// Converting Latitude and Longitude into meters
+		// Latitude: each is 10^-5 degree of lat Y
+		final int earth_radius_meters = 6378140; //at equator
+		final double location_latitude = 42.365; // angle from location to equator
+		double one_lat_to_meters = earth_radius_meters * 2 * Math.PI / (360*power); // 1.113 meters
+		//logMsg("one_lat_to_meters = " + one_lat_to_meters);
+		double one_long_to_meters = Math.cos(Math.toRadians(location_latitude))*one_lat_to_meters; // 0.822 meters
+		//logMsg("one_long_to_meters = " + one_long_to_meters);
+		
+		// Endpoints on (straight) Mass Ave to calculate theta
+		final double north_west_loc_long = -71.104888;
+		final double north_west_loc_lat = 42.365944;
+		final double south_east_loc_long = -71.100005;
+		final double south_east_loc_lat = 42.363492;
+		double x_diff = Math.abs(south_east_loc_long - north_west_loc_long) * one_long_to_meters * power; // 401.6m
+		//logMsg("x_diff = " + x_diff);
+		double y_diff = Math.abs(north_west_loc_lat - south_east_loc_lat) * one_lat_to_meters * power; // 272.9m
+		//logMsg("y_diff = " + y_diff);
+		double theta = Math.atan(y_diff / x_diff); // 0.597 radians or 34.21 degrees
+		//logMsg("theta = " + theta); 		
+		
+		// location in respect to south_east point
+		double loc_x = (locx - south_east_loc_long) * one_long_to_meters * power;
+		double loc_y = (locy - south_east_loc_lat) * one_lat_to_meters * power;
+		logMsg("unrotated x, y: " + loc_x + ", " + loc_y);
+		
+		// rotational matrix
+		double loc_x_rotated = -1 * loc_x * Math.cos(theta) + loc_y * Math.sin(theta); 
+		double loc_y_rotated = loc_x * Math.sin(theta) + loc_y * Math.cos(theta);
+		logMsg("rotated x, y: " + loc_x_rotated + ", " + loc_y_rotated);
+		
+		// find the current region
+		// Note: only depending on loc_x_rotated for this experiment
+		// TODO: for experiments involving a matrix of regions, add y
+		double current_region = (int) Math.floor(loc_x_rotated / region_width);
+		logMsg("location PINPOINTS to region = " + current_region + ", previous " + prevRegion.x);
+		
+ 
+		double region_width_boundary = Globals.REGION_WIDTH_BOUNDARY_METERS;
+		// check if it's inside boundary of region
+		// region_width_boundary is defined as the boundary from the edge of region to edge of boundary
+		// i.e. the total boundary length surrounding an edge is 2*this value
+		if ( (fractionMod(loc_x_rotated, region_width) < region_width_boundary) ||
+		     (fractionMod(region_width - loc_x_rotated, region_width) < region_width_boundary)
+			){
+			logMsg("location is INSIDE BOUNDARY, stay at prev region = " + prevRegion);
+		} else { 
+			// outside boundary
+			
+			// check that prev region and new region are next to each other
+			RegionKey new_region = new RegionKey((int) current_region, 0);
+			if (Math.abs(new_region.x - prevRegion.x) > 1) {
+				logMsg("Location CHANGED, but changed > 1 regions, so location is changed, trying to jump from region " +
+						prevRegion.x + " to region " + new_region.x);
+			} else if  (Math.abs(new_region.x - prevRegion.x) == 0) {
+				logMsg("stay at region " + prevRegion.x);
+			}
+			else {
+				logMsg("location CHANGED TO NEW region = " + new_region + " from region = " + prevRegion);
+				changeRegion(new_region);
+			}
+		}
+	}	
+	private double fractionMod(double a, double b){
+		double quotient = Math.floor(a/b);
+		return a-quotient*b;
 	}
 	
 	/**
