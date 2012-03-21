@@ -91,4 +91,5 @@ def client_download_photo(x, y):
 if __name__ == '__main__':
     #app.run(host='0.0.0.0', port=6212)
     # personal server
-    app.run(host='50.57.147.82', port=6212)
+    # TODO: change me
+    app.run(host='X.X.X.X', port=6212)
