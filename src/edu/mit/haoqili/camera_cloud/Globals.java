@@ -6,6 +6,10 @@ import android.os.Environment;
 
 
 public class Globals {
+		// frequently changed contants
+    	final static public String CLOUD_SERVER_NAME="hermes5.csail.mit.edu:8213";
+    
+	
 		// new region calculations
 		// road parameters, used to calculate region width
 		final static public double PHONE_RANGE_METERS = 60; // diagonal of region

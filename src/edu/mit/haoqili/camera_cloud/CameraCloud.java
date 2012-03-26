@@ -51,11 +51,6 @@ import com.google.gson.Gson;
 public class CameraCloud extends Activity implements LocationListener
 {	
 	final static private String TAG = "CameraCloud";
-	//final static String hostname = "ec2-122-248-219-48.ap-southeast-1.compute.amazonaws.com:4212";
-	// final static String hostname = "128.30.87.150:6212"; // laptop ethernet at stata
-	// final static String hostname = "50.57.147.82:6212"; // personal
-	//final static String hostname = "hermes5.csail.mit.edu:6212";
-	final static String hostname = "128.30.87.130:6212";
 	
 	public class CloudObject {
 		// Status codes
@@ -772,12 +767,9 @@ public class CameraCloud extends Activity implements LocationListener
 		} else { 
 			// outside boundary
 			
-			// check that prev region and new region are next to each other
+			// check that prev region and new region are different
 			RegionKey new_region = new RegionKey((int) current_region, 0);
-			if (Math.abs(new_region.x - prevRegion.x) > 1) {
-				logMsg("Location CHANGED, but changed > 1 regions, so location is changed, trying to jump from region " +
-						prevRegion.x + " to region " + new_region.x);
-			} else if  (Math.abs(new_region.x - prevRegion.x) == 0) {
+			if  (Math.abs(new_region.x - prevRegion.x) == 0) {
 				logMsg("stay at region " + prevRegion.x);
 			}
 			else {
@@ -799,7 +791,7 @@ public class CameraCloud extends Activity implements LocationListener
 			throws URISyntaxException, ClientProtocolException, IOException {
 		// ref http://localtone.blogspot.com/2009/07/post-json-using-android-and-httpclient.html
 		InputStream data = null;
-		String url = String.format("http://" + hostname
+		String url = String.format("http://" + Globals.CLOUD_SERVER_NAME
                 + "/%d/%d/%d/", client_req_int, x, y);
 		logMsg("Server request to url: " + url);
 		DefaultHttpClient httpclient = new DefaultHttpClient();
