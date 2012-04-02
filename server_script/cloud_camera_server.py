@@ -52,8 +52,11 @@ def client_upload_photo(x, y):
             return jsonify({'status': CR_OKAY})
         else:
             print "append to current array"
+            # TODO: if ever save multiple photos, change back
             # append to current array
-            regions[(x,y)].append(request.json["photo_bytes"])
+            #regions[(x,y)].append(request.json["photo_bytes"])
+            # set to first of array (ONLY SAVING ONE)
+            regions[(x,y)][0] = request.json["photo_bytes"]
             print "RETURN OKAY :D:D:D:D"
             print "Regions is now like: "
             print regions
@@ -89,7 +92,7 @@ def client_download_photo(x, y):
 # run
 #########################
 if __name__ == '__main__':
-    #app.run(host='0.0.0.0', port=6212)
-    # personal server
-    # TODO: change me
-    app.run(host='X.X.X.X', port=6212)
+    app.run(host='0.0.0.0', port=8213)
+    # hermes5:
+    #app.run(host='128.30.66.123', port=6212)
+
