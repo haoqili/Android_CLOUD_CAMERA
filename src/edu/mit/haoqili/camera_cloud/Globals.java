@@ -7,6 +7,9 @@ import android.os.Environment;
 
 public class Globals {
 		// frequently changed contants
+		final static public int JPEG_SAMPLE_SIZE = 12; // if too low, will cause Nexus S out of memory!
+
+		// cloud server
     	final static public String CLOUD_SERVER_NAME="hermes5.csail.mit.edu:8213";
     
 	

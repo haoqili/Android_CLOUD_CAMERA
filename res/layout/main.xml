@@ -2,21 +2,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" 
+    android:background="#8ccff5"> <!-- 4fa5d5 -->
 
-    <FrameLayout
-        android:id="@+id/CameraPreview"
+ <LinearLayout
+        android:id="@+id/CameraBoxes"
         android:layout_width="match_parent"
-        android:layout_height="100dip"
-        android:text="blah"/>
+        android:layout_height="110dip" >
+
+        <FrameLayout
+            android:id="@+id/CameraPreview"
+            android:layout_width="110dip"
+            android:layout_height="110dip"
+            android:layout_marginLeft="20dip"
+            android:layout_marginRight="50dip"
+            android:text="blah" />
+
+        <LinearLayout
+            android:id="@+id/PhotoDisplay"
+            android:layout_width="110dip"
+            android:layout_height="110dip" >
+			
+			<ImageView
+                android:id="@+id/photoResultView"
+                android:layout_width="110dip"
+                android:layout_height="110dip"
+                android:text="Photo placeholder" />
+
+    	</LinearLayout>
+    </LinearLayout>
         
     
     <LinearLayout
         android:id="@+id/StatusHeadingLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="wrap_content">
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/TextView04"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -24,6 +47,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/TextView03"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -31,6 +55,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/TextView01"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -38,6 +63,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/TextView05"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -51,6 +77,7 @@
         android:layout_height="wrap_content" >
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/state_tv"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -58,6 +85,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/region_tv"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -65,6 +93,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/id_tv"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -72,6 +101,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/leader_tv"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -89,7 +119,7 @@
         <Button
             android:id="@+id/camera_button"
             android:layout_width="80dip"
-            android:layout_height="wrap_content"
+            android:layout_height="0dip"
             android:padding="2dp"
             android:text="none" />
 
@@ -124,9 +154,9 @@
         <Button
             android:id="@+id/cameraPrev_button"
             android:layout_width="80dip"
-            android:layout_height="wrap_content"
+            android:layout_height="50dip"
             android:padding="2dp"
-            android:text="My Camera Take" />
+            android:text="Take Pic" />
 
         <Button
             android:id="@+id/get4_button"
@@ -150,17 +180,6 @@
             android:text="Reg 6 Get" />
 
     </LinearLayout>
-    
-    <LinearLayout
-        android:id="@+id/PhotoDisplay"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-
-        <ImageView
-            android:id="@+id/photoResultView"
-            android:layout_width="wrap_content"
-            android:layout_height="70dip" />
-    </LinearLayout>
 
     <ListView
         android:id="@+id/msgList"
@@ -177,6 +196,7 @@
         android:layout_height="wrap_content" >
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/opcount_tv"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -184,6 +204,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/successcount_tv"
             android:layout_width="110dip"
             android:layout_height="wrap_content"
@@ -191,6 +212,7 @@
         </TextView>
 
         <TextView
+            style="@style/CloudText"
             android:id="@+id/failurecount_tv"
             android:layout_width="90dip"
             android:layout_height="wrap_content"

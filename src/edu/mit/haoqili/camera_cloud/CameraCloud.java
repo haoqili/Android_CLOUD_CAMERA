@@ -180,10 +180,6 @@ public class CameraCloud extends Activity implements LocationListener {
 		progressDialog.dismiss();
 		areButtonsEnabled = true;
 		Log.i(TAG, "areButtonsEnabled --> true");
-		CharSequence text = "Can press buttons again";
-		Toast toast = Toast.makeText(getApplicationContext(), text,
-				Toast.LENGTH_SHORT);
-		toast.show();
 	}
 
 	/** Enable buttons again, either when getting reply or timed out */
@@ -517,24 +513,16 @@ public class CameraCloud extends Activity implements LocationListener {
 
 			logMsg("Picture successfully taken, ORIG BYTE LENGTH = "
 					+ picture.length);
-			try {
-				Bitmap orig_bitmap = _bytesToBitmap(picture);
-				Bitmap new_bitmap = _bytesResizeBitmap(picture, orig_bitmap);
-				ImageView image = (ImageView) findViewById(R.id.photoResultView);
 
-				logMsg("Show photo from handle my camera take");
-				image.setImageBitmap(new_bitmap);
-				sendClientNewpic(new_bitmap);
-			} catch (OptionalDataException e) {
-				logMsg("HandlePictureStorage _bytesToBitmap failed OptionalDataExeption");
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				logMsg("HandlePictureStorage _bytesToBitmap failed ClassNotFoundException");
-				e.printStackTrace();
-			} catch (IOException e) {
-				logMsg("HandlePictureStorage _bytesToBitmap failed IOException");
-				e.printStackTrace();
-			}
+			// must garbage collect here or VM Heap might run out of memory!!
+			System.gc();
+			Bitmap new_bitmap = _bytesResizeBitmap(picture);
+			ImageView image = (ImageView) findViewById(R.id.photoResultView);
+
+			logMsg("Show photo from handle my camera take");
+
+			image.setImageBitmap(new_bitmap);
+			sendClientNewpic(new_bitmap);
 		}
 	}
 
@@ -596,61 +584,21 @@ public class CameraCloud extends Activity implements LocationListener {
 		logMsg("end of client send picture method");
 	}
 
-	// resize photo
-	protected Bitmap _getAndResizeBitmap() {
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		// first we don't produce an actual bitmap, but just probe its
-		// dimensions
-		options.inJustDecodeBounds = true;
-		Bitmap bitmap = BitmapFactory.decodeFile(Globals.PHOTO_PATH, options);
-		int h, w;
-		if (options.outHeight > options.outWidth) {
-			h = (int) Math.ceil(options.outHeight
-					/ (float) Globals.TARGET_SHORT_SIDE);
-			w = (int) Math.ceil(options.outWidth
-					/ (float) Globals.TARGET_LONG_SIDE);
-		} else {
-			w = (int) Math.ceil(options.outHeight
-					/ (float) Globals.TARGET_SHORT_SIDE);
-			h = (int) Math.ceil(options.outWidth
-					/ (float) Globals.TARGET_LONG_SIDE);
-		}
-		if (h > 1 || w > 1) {
-			options.inSampleSize = (h > w) ? h : w;
-		}
+	protected Bitmap _bytesResizeBitmap(byte [] orig_bytes){
+		BitmapFactory.Options options =new BitmapFactory.Options();
+
 		// now we actually produce the bitmap, resized
-		options.inJustDecodeBounds = false;
-		bitmap = BitmapFactory.decodeFile(Globals.PHOTO_PATH, options);
-		logMsg("Our new height x width: " + bitmap.getHeight() + " x "
-				+ bitmap.getWidth());
-
-		return bitmap;
-	}
-
-	protected Bitmap _bytesResizeBitmap(byte[] orig_bytes, Bitmap orig_bitmap) {
-		BitmapFactory.Options options = new BitmapFactory.Options();
-		int h, w;
-		if (orig_bitmap.getHeight() > orig_bitmap.getWidth()) {
-			h = (int) Math.ceil(orig_bitmap.getHeight()
-					/ (float) Globals.TARGET_SHORT_SIDE);
-			w = (int) Math.ceil(orig_bitmap.getWidth()
-					/ (float) Globals.TARGET_LONG_SIDE);
-		} else {
-			w = (int) Math.ceil(orig_bitmap.getHeight()
-					/ (float) Globals.TARGET_SHORT_SIDE);
-			h = (int) Math.ceil(orig_bitmap.getWidth()
-					/ (float) Globals.TARGET_LONG_SIDE);
-		}
-		if (h > 1 || w > 1) {
-			options.inSampleSize = (h > w) ? h : w;
-		}
-		// now we actually produce the bitmap, resized
-		options.inJustDecodeBounds = false;
-		Bitmap new_bitmap = BitmapFactory.decodeByteArray(orig_bytes, 0,
-				orig_bytes.length, options);
-		logMsg("Our new height x width: " + new_bitmap.getHeight() + " x "
-				+ new_bitmap.getWidth());
-
+		options.inJustDecodeBounds=false;
+		// hard-code it to a big number
+		options.inSampleSize=Globals.JPEG_SAMPLE_SIZE;
+		// This decodeByteArray might crash the phone due to VM Heap OutOfMemoryError
+		// if the options.inSampleSize is not set to a big number
+		// that's why we garbage collect before calling this function and gc other decodeByteArrays to be safe
+		// http://stackoverflow.com/questions/6402858/android-outofmemoryerror-bitmap-size-exceeds-vm-budget
+		// http://stackoverflow.com/questions/477572/android-strange-out-of-memory-issue-while-loading-an-image-to-a-bitmap-object
+		Bitmap new_bitmap =BitmapFactory.decodeByteArray(orig_bytes, 0, orig_bytes.length, options);
+		logMsg("Our new height x width: " + new_bitmap.getHeight() + " x " + new_bitmap.getWidth());
+		
 		return new_bitmap;
 	}
 
@@ -664,12 +612,6 @@ public class CameraCloud extends Activity implements LocationListener {
 		// should still be under 65000 bytes
 		byte[] bytes = bos.toByteArray();
 		return bytes;
-	}
-
-	public Bitmap _bytesToBitmap(byte[] photo_bytes)
-			throws OptionalDataException, ClassNotFoundException, IOException {
-		return BitmapFactory
-				.decodeByteArray(photo_bytes, 0, photo_bytes.length);
 	}
 
 	/* ############################################### */
@@ -827,19 +769,6 @@ public class CameraCloud extends Activity implements LocationListener {
 							Toast.LENGTH_LONG);
 					toast.show();
 				} else {
-					Bitmap photo_one = null;
-					try {
-						photo_one = _bytesToBitmap(photo_bytes);
-					} catch (OptionalDataException e) {
-						logMsg("get photo _bytesToBitmap OptionalDataException");
-						e.printStackTrace();
-					} catch (ClassNotFoundException e) {
-						logMsg("get photo _bytesToBitmap ClassNotFoundException");
-						e.printStackTrace();
-					} catch (IOException e) {
-						logMsg("get photo _bytesToBitmap IOException");
-						e.printStackTrace();
-					}
 					ImageView image = (ImageView) findViewById(R.id.photoResultView);
 
 					// print success!
@@ -849,8 +778,12 @@ public class CameraCloud extends Activity implements LocationListener {
 							Toast.LENGTH_SHORT);
 					toast.show();
 
+					logMsg("Remote photo's length: " + photo_bytes.length);
+					
 					// show photo
-					image.setImageBitmap(photo_one);
+					// Garbage collect in case VM Heap runs out of memory with decodeByteArray
+					System.gc();
+					image.setImageBitmap(BitmapFactory.decodeByteArray(photo_bytes, 0, photo_bytes.length));
 				}
 			}
 

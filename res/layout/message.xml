@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/CloudText"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:padding="2dp"
-    android:textSize="12sp" >
+    android:textSize="12sp"
+    android:background="#8ccff5">
 </TextView>
