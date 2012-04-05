@@ -34,14 +34,16 @@ public class Globals {
         final static public int SOUTHEAST_LONG = -7110000;
         final static public int SOUTHEAST_LAT = 4236349;
         // Long is x
-        final static public int MAX_X_REGIONS=10;
+        final static public int MAX_X_REGIONS=6;
         final static public int MAX_Y_REGIONS=1;
         final static public int MINIMUM_LONGITUDE=SOUTHEAST_LONG - REGION_WIDTH*MAX_X_REGIONS;
         final static public int MINIMUM_LATITUDE=SOUTHEAST_LAT;
         
+        // region constraints, for the UI
+        final static public int MIN_REGION = 0;
+        final static public int MAX_REGION = MAX_X_REGIONS-1;
         
         final static public int SPARSE_NUM_ITER=100000;
-		public static final boolean DEBUG_SKIP_CLOUD = true;
 
 		// photo properties
 		final static public int COMP_QUALITY = 10; // 0 - 100, 100 is max quality
