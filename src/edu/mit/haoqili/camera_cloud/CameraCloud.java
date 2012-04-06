@@ -843,7 +843,6 @@ public class CameraCloud extends Activity implements LocationListener {
 	public void determineLocation(Location loc, RegionKey prevRegion) {
 		// currently determining region only depends on X
 
-		logMsg("INSIDE DETERMINELOCATION");
 		logMsg("Loc = " + loc + " Previous Region = " + prevRegion);
 
 		double locx = loc.getLongitude();
@@ -870,16 +869,11 @@ public class CameraCloud extends Activity implements LocationListener {
 				* one_lat_to_meters; // 0.822 meters
 		// logMsg("one_long_to_meters = " + one_long_to_meters);
 
-		// Endpoints on (straight) Mass Ave to calculate theta
-		/*
-		 * final double north_west_loc_long = -71.104888; final double
-		 * north_west_loc_lat = 42.365944; final double south_east_loc_long =
-		 * -71.100005; final double south_east_loc_lat = 42.363492;
-		 */
-		final double north_west_loc_long = -71.093881;
-		final double north_west_loc_lat = 42.359644;
-		final double south_east_loc_long = -71.092894;
-		final double south_east_loc_lat = 42.357741;
+		// Endpoints of straight road to calculate theta
+		final double north_west_loc_long = Globals.NW_LONG;
+		final double north_west_loc_lat = Globals.NW_LAT;
+		final double south_east_loc_long = Globals.SE_LONG;
+		final double south_east_loc_lat = Globals.SE_LAT;
 
 		double x_diff = Math.abs(south_east_loc_long - north_west_loc_long)
 				* one_long_to_meters * power; // 401.6m
@@ -895,14 +889,14 @@ public class CameraCloud extends Activity implements LocationListener {
 		double loc_x = (locx - south_east_loc_long) * one_long_to_meters
 				* power;
 		double loc_y = (locy - south_east_loc_lat) * one_lat_to_meters * power;
-		logMsg("unrotated x, y: " + loc_x + ", " + loc_y);
+		//logMsg("unrotated x, y: " + loc_x + ", " + loc_y);
 
 		// rotational matrix
 		double loc_x_rotated = -1 * loc_x * Math.cos(theta) + loc_y
 				* Math.sin(theta);
 		double loc_y_rotated = loc_x * Math.sin(theta) + loc_y
 				* Math.cos(theta);
-		logMsg("rotated x, y: " + loc_x_rotated + ", " + loc_y_rotated);
+		//logMsg("rotated x, y: " + loc_x_rotated + ", " + loc_y_rotated);
 
 		// find the current region
 		// Note: only depending on loc_x_rotated for this experiment
