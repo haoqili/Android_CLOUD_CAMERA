@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
@@ -89,6 +90,15 @@ public class CameraCloud extends Activity implements LocationListener {
 	// Logging to file
 	File myLogFile;
 	PrintWriter myLogWriter;
+	
+	// counts: success/failures
+	private int takeNum = 0; // # of times pressed "Take Picture"
+	private int takeCamGood = 0; // # times got into the Camera callback
+	private int takeGoodSave = 0; // # "Take Picture" successes
+	private int takeBad = 0; // # "Take Picture" failures
+	private int getNum = 0; // # of times pressed "Get x Region"
+	private int getGood = 0; // # get success
+	private int getBad = 0; // # get failure
 
 	// areButtonsEnabled is the first line of defense against multi-clicking
 	// set to false as soon as a take/get picture button is pressed
@@ -150,6 +160,12 @@ public class CameraCloud extends Activity implements LocationListener {
 		}
 	}
 
+	private void logCounts(){
+		logMsg("takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
+				+ " takeBad="+takeBad+ " getNum="+getNum
+				+ " getGood="+getGood+ " getBad="+getBad);
+	}
+	
 	/**
 	 * Disable buttons at press of any button (take new pic for upload / region
 	 * x get for download)
@@ -184,6 +200,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			CharSequence text = "Can't press button during processing";
 			Toast toast = Toast.makeText(getApplicationContext(), text,
 					Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.CENTER, 0,0);
 			toast.show();
 			return false;
 		}
@@ -200,6 +217,7 @@ public class CameraCloud extends Activity implements LocationListener {
 					+ ". You're at " + myRegion.x;
 			Toast toast = Toast.makeText(getApplicationContext(), text,
 					Toast.LENGTH_LONG);
+			toast.setGravity(Gravity.CENTER, 0,0);
 			toast.show();
 			return false;
 		}
@@ -264,6 +282,9 @@ public class CameraCloud extends Activity implements LocationListener {
 
 					// myHandler.postDelayed(buttonsEnableProgressTimeoutR,
 					// uploadTimeoutPeriod);
+					
+					takeNum += 1;
+					logCounts();
 
 					logMsg("** Clicked take picture button **");
 
@@ -410,6 +431,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				CharSequence text = "please input a region";
 				Toast toast = Toast.makeText(getApplicationContext(), text,
 						Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.CENTER, 0,0);
 				toast.show();
 			} else {
 				int rX = Integer.parseInt(strX);
@@ -421,6 +443,7 @@ public class CameraCloud extends Activity implements LocationListener {
 							+ Globals.MIN_REGION + " ~ " + Globals.MAX_REGION;
 					Toast toast = Toast.makeText(getApplicationContext(), text,
 							Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0,0);
 					toast.show();
 				} else {
 					changeRegion(new RegionKey(rX, rY));
@@ -484,6 +507,9 @@ public class CameraCloud extends Activity implements LocationListener {
 		public void onPictureTaken(byte[] picture, Camera camera) {
 			logMsg("inside HandlePictureStorage onPictureTaken()");
 
+			takeCamGood += 1;
+			logCounts();
+			
 			// let the preview work again
 			cameraSurfaceView.camera.startPreview();
 
@@ -504,6 +530,9 @@ public class CameraCloud extends Activity implements LocationListener {
 
 	protected void sendClientNewpic(Bitmap bitmap) {
 		logMsg("client making photo packet to send to leader");
+		
+		boolean isSaveSuccess = false;
+		
 		// Create a Packet to send to the Cloud
 		try {
 			// jpeg compression in bitmapToBytes
@@ -537,13 +566,21 @@ public class CameraCloud extends Activity implements LocationListener {
 					CharSequence text = "FAIL! Saving photo on cloud server failed, try again.";
 					Toast toast = Toast.makeText(getApplicationContext(), text,
 							Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0,0);
 					toast.show();
 				} else { // CloudObject.CR_OKAY:
+					
+					// count it
+					isSaveSuccess = true;
+					takeGoodSave += 1; // add here in case things screw up later
+					logCounts();
+					
 					logMsg("SUCCESS! Client now knows saving photo on cloud server succeeded");
-					CharSequence text = "SUCCESS! Saving photo on cloud server succeeded";
-					Toast toast = Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT);
-					toast.show();
+					//CharSequence text = "SUCCESS! Saving photo on cloud server succeeded";
+					//Toast toast = Toast.makeText(getApplicationContext(), text,
+					//		Toast.LENGTH_SHORT);
+					//toast.setGravity(Gravity.CENTER, 0,0);
+					//toast.show();
 				}
 
 				logMsg("RETURN STATUS: " + co_return.status);
@@ -553,6 +590,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				CharSequence text = "Failed to complete the server request";
 				Toast toast = Toast.makeText(getApplicationContext(), text,
 						Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.CENTER, 0,0);
 				toast.show();
 			}
 			
@@ -564,6 +602,13 @@ public class CameraCloud extends Activity implements LocationListener {
 		// enable buttons regardless of success or fail
 		// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
 		_enableButtons();
+		
+		if (!isSaveSuccess){
+			takeBad += 1;
+			logCounts();
+			logMsg("takeBad++");
+		}
+		
 		logMsg("end of client send picture method");
 	}
 
@@ -610,8 +655,13 @@ public class CameraCloud extends Activity implements LocationListener {
 				// http://stackoverflow.com/questions/2798443/android-progressdialog-doesnt-show
 				// but users can't press buttons either, so hopefully it's going to be okay
 				progressDialog = ProgressDialog.show(CameraCloud.this, "",
-						"Processing photo get or save to cloud server ... :)");
+						"Processing photo get or save to cloud server... :)");
 
+        		getNum +=1;
+        		logCounts();
+        		
+        		boolean isGetSuccess = false;
+        		
 				long targetRegion = 666;
         		switch (v.getId()){
         		case R.id.get0_button:
@@ -663,6 +713,7 @@ public class CameraCloud extends Activity implements LocationListener {
 						CharSequence text = "FAIL! Failed to get photo from cloud server, try again";
 						Toast toast = Toast.makeText(getApplicationContext(), text,
 								Toast.LENGTH_LONG);
+						toast.setGravity(Gravity.CENTER, 0,0);
 						toast.show();
 					} else if (co_return.status == CloudObject.CR_NO_PHOTO) { // no
 						// photo
@@ -670,6 +721,7 @@ public class CameraCloud extends Activity implements LocationListener {
 						CharSequence text = "PHOTO DATA is NULL, perhaps region doesn't have a photo yet";
 						Toast toast = Toast.makeText(getApplicationContext(), text,
 								Toast.LENGTH_LONG);
+						toast.setGravity(Gravity.CENTER, 0,0);
 						toast.show();
 					} else { // success and might have photo data!
 
@@ -681,17 +733,25 @@ public class CameraCloud extends Activity implements LocationListener {
 							CharSequence text = "PHOTO DATA is NULL, perhaps region doesn't have a photo yet";
 							Toast toast = Toast.makeText(getApplicationContext(), text,
 									Toast.LENGTH_LONG);
+							toast.setGravity(Gravity.CENTER, 0,0);
 							toast.show();
 
 						} else {
+							
+							// success!
+							
+							isGetSuccess = true;
+							getGood += 1;
+							logCounts();
+							
 							ImageView image = (ImageView) findViewById(R.id.photoResultView);
 
-							// success!
 							logMsg("Success! Client getting photo from cloud server, showing photo...");
-							CharSequence text = "SUCCESS! Getting photo from cloud server succeeded, showing photo ...";
-							Toast toast = Toast.makeText(getApplicationContext(), text,
-									Toast.LENGTH_SHORT);
-							toast.show();
+							//CharSequence text = "SUCCESS! Getting photo from cloud server succeeded, showing photo ...";
+							//Toast toast = Toast.makeText(getApplicationContext(), text,
+							//		Toast.LENGTH_SHORT);
+							//toast.setGravity(Gravity.CENTER, 0,0);
+							//toast.show();
 
 							logMsg("Remote photo's length: " + photo_bytes.length);
 
@@ -709,12 +769,20 @@ public class CameraCloud extends Activity implements LocationListener {
 					CharSequence text = "Failed to complete the server request";
 					Toast toast = Toast.makeText(getApplicationContext(), text,
 							Toast.LENGTH_SHORT);
+					toast.setGravity(Gravity.CENTER, 0,0);
 					toast.show();
 				}
 				// TODO marker
 				// enable buttons regardless of success or fail
 				// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
 				_enableButtons();
+				
+				if (!isGetSuccess){
+					getBad += 1;
+					logCounts();
+					logMsg("getBad++");
+				}
+				
 			} else {
 				logMsg("can't press any buttons yet (in cameracloud)");
 			}
