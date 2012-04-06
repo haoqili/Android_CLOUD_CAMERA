@@ -981,7 +981,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				response = httpclient.execute(httpost);
 
 				long stopTime = System.currentTimeMillis();
-				logMsg(String.format("Execute HTTP latency: %dms", stopTime - startTime));
+				logMsg(String.format("CameraCloud Execute HTTP latency: %dms", stopTime - startTime));
 
 				logMsg("finished executing HTTP POST, get data");
 				data = response.getEntity().getContent();
