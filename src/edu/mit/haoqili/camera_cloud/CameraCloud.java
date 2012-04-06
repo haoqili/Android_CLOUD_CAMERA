@@ -5,17 +5,15 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OptionalDataException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.net.URISyntaxException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -75,12 +73,9 @@ public class CameraCloud extends Activity implements LocationListener {
 		}
 	}
 
-	private static final int CAMERA_PIC_REQUEST = 111;
-
 	// UI elements
 	Button camera_button, region_button, my_camera_button;
-	Button get1_button, get2_button, get3_button, get4_button, get5_button,
-			get6_button;
+	Button get0_button, get1_button, get2_button, get3_button, get4_button, get5_button;
 	TextView opCountTv, successCountTv, failureCountTv;
 	TextView regionTv;
 	EditText regionText, threadsText;
@@ -95,9 +90,6 @@ public class CameraCloud extends Activity implements LocationListener {
 	File myLogFile;
 	PrintWriter myLogWriter;
 
-	// timeout stuff
-	final static private long uploadTimeoutPeriod = 6000L;
-	final static private long downloadTimoutPeriod = 10000L;
 	// areButtonsEnabled is the first line of defense against multi-clicking
 	// set to false as soon as a take/get picture button is pressed
 	// none of the other buttons can be pressed until it's set true again
@@ -108,7 +100,6 @@ public class CameraCloud extends Activity implements LocationListener {
 	private ProgressDialog progressDialog;
 
 	// VCore Daemon Location Constants
-	private long nodeId;
 	private RegionKey myRegion;
 	private static final int regionWidth = Globals.REGION_WIDTH; // ~meters
 	// lat / long * 10^5, e.g. 103.77900 becomes 10377900
@@ -147,7 +138,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			}
 		}
 	};
-
+	
 	/** Log message and also display on screen */
 	public void logMsg(String msg) {
 		msg = String.format("%d: %s", System.currentTimeMillis(), msg);
@@ -159,7 +150,6 @@ public class CameraCloud extends Activity implements LocationListener {
 		}
 	}
 
-	// Runnables // TODO
 	/**
 	 * Disable buttons at press of any button (take new pic for upload / region
 	 * x get for download)
@@ -167,33 +157,24 @@ public class CameraCloud extends Activity implements LocationListener {
 	private Runnable disableButtonsProgressStartR = new Runnable() {
 		public void run() {
 			Log.i(TAG,
-					"Inside disableButtonsR #############################################");
+					"Inside disableButtonsR XXX");
 			areButtonsEnabled = false;
 			Log.i(TAG, "areButtonsEnabled --> false");
 			progressDialog = ProgressDialog.show(CameraCloud.this, "",
 					"Processing photo get or save to cloud server ... :)");
 		}
 	};
-
+	
 	private void _enableButtons() {
-		Log.i(TAG, "Inside _enableButtons");
-		progressDialog.dismiss();
+		logMsg("Inside _enableButtons");
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+		} else {
+			logMsg("No progress dialog to dismiss");
+		}
 		areButtonsEnabled = true;
-		Log.i(TAG, "areButtonsEnabled --> true");
+		logMsg("areButtonsEnabled --> true");
 	}
-
-	/** Enable buttons again, either when getting reply or timed out */
-	/*
-	 * private Runnable buttonsEnableProgressTimeoutR = new Runnable() { public
-	 * void run() { Log.i(TAG,
-	 * "inside buttonsEnableProgressTimeoutR. OH NO! Your photo (save/get) request TIMED OUT. Try again later!"
-	 * ); CharSequence text =
-	 * "OH NO! Your photo (take/get) request TIMED OUT. Try again later!"; Toast
-	 * toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
-	 * toast.show(); _enableButtons();
-	 * 
-	 * } };
-	 */
 
 	// check that we can press buttons by
 	// 1. areButtonsEnabled is true AND region is inside valid range
@@ -238,7 +219,6 @@ public class CameraCloud extends Activity implements LocationListener {
 		setContentView(R.layout.main);
 
 		// Mux initializations
-		nodeId = -1;
 		// Start outside active region
 		long initRx = -1;
 		long initRy = -1;
@@ -248,19 +228,18 @@ public class CameraCloud extends Activity implements LocationListener {
 		region_button = (Button) findViewById(R.id.region_button);
 		region_button.setOnClickListener(region_button_listener);
 		camera_button = (Button) findViewById(R.id.camera_button);
-		// camera_button.setOnClickListener(camera_button_listener);
+		get0_button = (Button) findViewById(R.id.get0_button);
+		get0_button.setOnClickListener(get_button_listener);
 		get1_button = (Button) findViewById(R.id.get1_button);
-		get1_button.setOnClickListener(get1_button_listener);
+		get1_button.setOnClickListener(get_button_listener);
 		get2_button = (Button) findViewById(R.id.get2_button);
-		get2_button.setOnClickListener(get2_button_listener);
+		get2_button.setOnClickListener(get_button_listener);
 		get3_button = (Button) findViewById(R.id.get3_button);
-		get3_button.setOnClickListener(get3_button_listener);
+		get3_button.setOnClickListener(get_button_listener);
 		get4_button = (Button) findViewById(R.id.get4_button);
-		get4_button.setOnClickListener(get4_button_listener);
+		get4_button.setOnClickListener(get_button_listener);
 		get5_button = (Button) findViewById(R.id.get5_button);
-		get5_button.setOnClickListener(get5_button_listener);
-		get6_button = (Button) findViewById(R.id.get6_button);
-		get6_button.setOnClickListener(get6_button_listener);
+		get5_button.setOnClickListener(get_button_listener);
 
 		// Setup the FrameLayout with the Camera Preview Screen
 		cameraSurfaceView = new CameraSurfaceView(this);
@@ -277,12 +256,10 @@ public class CameraCloud extends Activity implements LocationListener {
 					logMsg("disabling buttons ...");
 					// Disable buttons until timeout is over or received reply
 					// myHandler.post(disableButtonsProgressStartR);
-					Log.i(TAG,
-							"Inside disableButtonsR #############################################");
+					logMsg("new pic disableButtons XXX");
 					areButtonsEnabled = false;
-					Log.i(TAG, "areButtonsEnabled --> false");
-					progressDialog = ProgressDialog
-							.show(CameraCloud.this, "",
+					logMsg("areButtonsEnabled --> false");
+					progressDialog = ProgressDialog.show(CameraCloud.this, "",
 									"Processing photo get or save to cloud server ... :)");
 
 					// myHandler.postDelayed(buttonsEnableProgressTimeoutR,
@@ -502,7 +479,6 @@ public class CameraCloud extends Activity implements LocationListener {
 	 * 
 	 * The photo is not saved on the sdcard.
 	 * */
-	// TODO
 	private class HandlePictureStorage implements PictureCallback {
 		@Override
 		public void onPictureTaken(byte[] picture, Camera camera) {
@@ -542,45 +518,52 @@ public class CameraCloud extends Activity implements LocationListener {
 			CloudObject co_return = serverRequest(CLIENT_UPLOAD_PHOTO,
 					(int) myRegion.x, (int) myRegion.y, co_send);
 
-			// TODO: I'm a location marker. Delete this line when useless
-			// Processing the return from the cloud
-			// Analogous to Camera DIPLOMA's
-			// "case Packet.CLIENT_UPLOAD_PHOTO_ACK"
+			if (co_return != null) { // success!
 
-			// latency stuff
-			long upload_end = System.currentTimeMillis();
-			long latency = upload_end - upload_start;
-			logMsg("CameraCloud upload new photo latency = " + latency);
-			logMsg("CameraCloud upload start " + upload_start + " ~ stop "
-					+ upload_end);
+				// Processing the return from the cloud
+				// Analogous to Camera DIPLOMA's
+				// "case Packet.CLIENT_UPLOAD_PHOTO_ACK"
 
-			// see if it was unsuccessful
-			if (co_return.status == CloudObject.CR_ERROR) {
-				logMsg("FAIL! Client now knows saving photo on cloud server failed");
-				CharSequence text = "FAIL! Saving photo on cloud server failed, try again.";
-				Toast toast = Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_SHORT);
-				toast.show();
-			} else { // CloudObject.CR_OKAY:
-				logMsg("SUCCESS! Client now knows saving photo on cloud server succeeded");
-				CharSequence text = "SUCCESS! Saving photo on cloud server succeeded";
+				// latency stuff
+				long upload_end = System.currentTimeMillis();
+				long latency = upload_end - upload_start;
+				logMsg("CameraCloud upload new photo latency = " + latency);
+				logMsg("CameraCloud upload start " + upload_start + " ~ stop "
+						+ upload_end);
+
+				// see if it was unsuccessful
+				if (co_return.status == CloudObject.CR_ERROR) {
+					logMsg("FAIL! Client now knows saving photo on cloud server failed");
+					CharSequence text = "FAIL! Saving photo on cloud server failed, try again.";
+					Toast toast = Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT);
+					toast.show();
+				} else { // CloudObject.CR_OKAY:
+					logMsg("SUCCESS! Client now knows saving photo on cloud server succeeded");
+					CharSequence text = "SUCCESS! Saving photo on cloud server succeeded";
+					Toast toast = Toast.makeText(getApplicationContext(), text,
+							Toast.LENGTH_SHORT);
+					toast.show();
+				}
+
+				logMsg("RETURN STATUS: " + co_return.status);
+				
+			} else { // something went wrong in the server request
+				logMsg("Failed to complete the server request");
+				CharSequence text = "Failed to complete the server request";
 				Toast toast = Toast.makeText(getApplicationContext(), text,
 						Toast.LENGTH_SHORT);
 				toast.show();
 			}
-
-			// enable buttons right now, not until progressdialog timeout
-			// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
-			_enableButtons();
-
-			logMsg("RETURN STATUS: " + co_return.status);
-		} catch (URISyntaxException e) {
-			logMsg("sendClientNewpic failed URISyntaxException");
-			e.printStackTrace();
+			
 		} catch (IOException e) {
 			logMsg("sendClientNewpic failed IOException");
 			e.printStackTrace();
 		}
+		
+		// enable buttons regardless of success or fail
+		// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
+		_enableButtons();
 		logMsg("end of client send picture method");
 	}
 
@@ -615,194 +598,129 @@ public class CameraCloud extends Activity implements LocationListener {
 	}
 
 	/* ############################################### */
-	/* ############################################### */
-	/* ############################################### */
-	/* dumb button listeners */
-	private OnClickListener get1_button_listener = new OnClickListener() {
+	private OnClickListener get_button_listener = new OnClickListener() {
 		public void onClick(View v) {
 			if (canPressButton()) {
 				// disable button clicks ASAP
 				areButtonsEnabled = false;
 				logMsg("areButtonsEnabled --> false ");
+				logMsg("Inside get photo disableButtons XXX");
+				// TODO: marker
+				// progressDialog not showing due to the massive amount of stuff that follows
+				// http://stackoverflow.com/questions/2798443/android-progressdialog-doesnt-show
+				// but users can't press buttons either, so hopefully it's going to be okay
+				progressDialog = ProgressDialog.show(CameraCloud.this, "",
+						"Processing photo get or save to cloud server ... :)");
 
-				logMsg("** Clicked getphotos Button from region 1 **");
-				long targetRegion = 1;
-				_button_listener_helper(targetRegion);
-			} else {
-				logMsg("can't press region 1 yet");
-			}
-		}
-	};
-	private OnClickListener get2_button_listener = new OnClickListener() {
-		public void onClick(View v) {
-			if (canPressButton()) {
-				// disable button clicks ASAP
-				areButtonsEnabled = false;
-				logMsg("areButtonsEnabled --> false ");
+				long targetRegion = 666;
+        		switch (v.getId()){
+        		case R.id.get0_button:
+        			targetRegion = 0;
+        			break;
+        		case R.id.get1_button:
+        			targetRegion = 1;
+        			break;
+        		case R.id.get2_button:
+        			targetRegion = 2;
+        			break;
+        		case R.id.get3_button:
+        			targetRegion = 3;
+        			break;
+        		case R.id.get4_button:
+        			targetRegion = 4;
+        			break;
+        		case R.id.get5_button:
+        			targetRegion = 5;
+        			break;
+        		}
+        		logMsg("** Clicked getphotos Button from region " + targetRegion + " **");
 
-				logMsg("** Clicked getphotos Button from region 2 **");
-				long targetRegion = 2;
-				_button_listener_helper(targetRegion);
-			} else {
-				logMsg("can't press region 2 yet");
-			}
-		}
-	};
-	private OnClickListener get3_button_listener = new OnClickListener() {
-		public void onClick(View v) {
-			if (canPressButton()) {
-				// disable button clicks ASAP
-				areButtonsEnabled = false;
-				logMsg("areButtonsEnabled --> false ");
+        		// Create a Packet to send through Mux to Leader's UserApp
+				CloudObject co_send = new CloudObject(null);
+				CloudObject co_return;
+				logMsg("Trying to get photo from server, about to call serverRequest()");
 
-				logMsg("** Clicked getphotos Button from region 3 **");
-				long targetRegion = 3;
-				_button_listener_helper(targetRegion);
-			} else {
-				logMsg("can't press region 3 yet");
-			}
-		}
-	};
-	private OnClickListener get4_button_listener = new OnClickListener() {
-		public void onClick(View v) {
-			if (canPressButton()) {
-				// disable button clicks ASAP
-				areButtonsEnabled = false;
-				logMsg("areButtonsEnabled --> false ");
+				// Send to the Cloud
+				long download_start = System.currentTimeMillis();
+				co_return = serverRequest(CLIENT_DOWNLOAD_PHOTO,
+						(int) targetRegion, 0, co_send);
 
-				logMsg("** Clicked getphotos Button from region 4 **");
-				long targetRegion = 4;
-				_button_listener_helper(targetRegion);
-			} else {
-				logMsg("can't press region 4 yet");
-			}
-		}
-	};
-	private OnClickListener get5_button_listener = new OnClickListener() {
-		public void onClick(View v) {
-			if (canPressButton()) {
-				// disable button clicks ASAP
-				areButtonsEnabled = false;
-				logMsg("areButtonsEnabled --> false ");
+				if (co_return != null) { // success
+					// Processing the return from the cloud
+					// Analogous to Camera DIPLOMA's
+					// "case Packet.CLIENT_SHOW_REMOTEPHOTO"
 
-				logMsg("** Clicked getphotos Button from region 5 **");
-				long targetRegion = 5;
-				_button_listener_helper(targetRegion);
-			} else {
-				logMsg("can't press region 5 yet");
-			}
-		}
-	};
-	private OnClickListener get6_button_listener = new OnClickListener() {
-		public void onClick(View v) {
-			if (canPressButton()) {
-				// disable button clicks ASAP
-				areButtonsEnabled = false;
-				logMsg("areButtonsEnabled --> false ");
+					// latency stuff
+					long download_end = System.currentTimeMillis();
+					long latency = download_end - download_start;
+					logMsg("CameraCloud download photo latency = " + latency);
+					logMsg("CameraCloud download start " + download_start + " ~ stop "
+							+ download_end);
 
-				logMsg("** Clicked getphotos Button from region 6 **");
-				long targetRegion = 6;
-				_button_listener_helper(targetRegion);
-			} else {
-				logMsg("can't press region 6 yet");
-			}
-		}
-	};
+					// see if it was unsuccessful
+					if (co_return.status == CloudObject.CR_ERROR) {
+						logMsg("FAIL! Client failed to get photo from cloud server");
+						CharSequence text = "FAIL! Failed to get photo from cloud server, try again";
+						Toast toast = Toast.makeText(getApplicationContext(), text,
+								Toast.LENGTH_LONG);
+						toast.show();
+					} else if (co_return.status == CloudObject.CR_NO_PHOTO) { // no
+						// photo
+						logMsg("PHOTO DATA is NULL, perhaps region doesn't have a photo yet");
+						CharSequence text = "PHOTO DATA is NULL, perhaps region doesn't have a photo yet";
+						Toast toast = Toast.makeText(getApplicationContext(), text,
+								Toast.LENGTH_LONG);
+						toast.show();
+					} else { // success and might have photo data!
 
-	private void _button_listener_helper(long targetRegion) { // TODO
-		// Disable buttons until timeout is over, or received reply
-		// myHandler.post(disableButtonsProgressStartR);
-		Log.i(TAG,
-				"Inside disableButtonsR @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
-		areButtonsEnabled = false;
-		Log.i(TAG, "areButtonsEnabled --> false");
-		progressDialog = ProgressDialog.show(CameraCloud.this, "",
-				"Processing photo get or save to cloud server ... :)");
+						// process photo
+						byte[] photo_bytes = co_return.photo_bytes;
+						if (photo_bytes == null) {
+							// in case photo is null but server didn't ditect
+							logMsg("PHOTO DATA is NULL, perhaps region doesn't have a photo yet and server doesn't know");
+							CharSequence text = "PHOTO DATA is NULL, perhaps region doesn't have a photo yet";
+							Toast toast = Toast.makeText(getApplicationContext(), text,
+									Toast.LENGTH_LONG);
+							toast.show();
 
-		// myHandler.postDelayed(buttonsEnableProgressTimeoutR,
-		// downloadTimoutPeriod);
+						} else {
+							ImageView image = (ImageView) findViewById(R.id.photoResultView);
 
-		// Create a Packet to send through Mux to Leader's UserApp
-		CloudObject co_send = new CloudObject(null);
-		CloudObject co_return;
-		logMsg("Trying to get photo from server %%%%%%@%@%@%@%@%@%@%@%@%@%@%@%@%@%@%%@%@%@@%%@");
-		try {
-			// Send to the Cloud
-			long download_start = System.currentTimeMillis();
-			co_return = serverRequest(CLIENT_DOWNLOAD_PHOTO,
-					(int) targetRegion, 0, co_send);
+							// success!
+							logMsg("Success! Client getting photo from cloud server, showing photo...");
+							CharSequence text = "SUCCESS! Getting photo from cloud server succeeded, showing photo ...";
+							Toast toast = Toast.makeText(getApplicationContext(), text,
+									Toast.LENGTH_SHORT);
+							toast.show();
 
-			// Processing the return from the cloud
-			// Analogous to Camera DIPLOMA's
-			// "case Packet.CLIENT_SHOW_REMOTEPHOTO"
+							logMsg("Remote photo's length: " + photo_bytes.length);
 
-			// latency stuff
-			long download_end = System.currentTimeMillis();
-			long latency = download_end - download_start;
-			logMsg("CameraCloud download photo latency = " + latency);
-			logMsg("CameraCloud download start " + download_start + " ~ stop "
-					+ download_end);
+							// show photo
+							// Garbage collect in case VM Heap runs out of memory with decodeByteArray
+							System.gc();
+							image.setImageBitmap(BitmapFactory.decodeByteArray(photo_bytes, 0, photo_bytes.length));
+						}
+					}
 
-			// see if it was unsuccessful
-			if (co_return.status == CloudObject.CR_ERROR) {
-				logMsg("FAIL! Client failed to get photo from cloud server");
-				CharSequence text = "FAIL! Failed to get photo from cloud server, try again";
-				Toast toast = Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_LONG);
-				toast.show();
-			} else if (co_return.status == CloudObject.CR_NO_PHOTO) { // no
-																		// photo
-				logMsg("PHOTO DATA is NULL, perhaps region doesn't have a photo yet");
-				CharSequence text = "PHOTO DATA is NULL, perhaps region doesn't have a photo yet";
-				Toast toast = Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_LONG);
-				toast.show();
-			} else { // success and has photo data!
+					logMsg("Done with Get photos button for region " + targetRegion);
 
-				// process photo
-				byte[] photo_bytes = co_return.photo_bytes;
-				if (photo_bytes == null) {
-					// in case photo is null but server didn't ditect
-					logMsg("PHOTO DATA is NULL, perhaps region doesn't have a photo yet and server doesn't know");
-					CharSequence text = "PHOTO DATA is NULL, perhaps region doesn't have a photo yet";
-					Toast toast = Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_LONG);
-					toast.show();
-				} else {
-					ImageView image = (ImageView) findViewById(R.id.photoResultView);
-
-					// print success!
-					logMsg("Success! Client getting photo from cloud server, showing photo...");
-					CharSequence text = "SUCCESS! Getting photo from cloud server succeeded, showing photo ...";
+				} else { // something went wrong in the server request
+					logMsg("Failed to complete the server request (to get photo)");
+					CharSequence text = "Failed to complete the server request";
 					Toast toast = Toast.makeText(getApplicationContext(), text,
 							Toast.LENGTH_SHORT);
 					toast.show();
-
-					logMsg("Remote photo's length: " + photo_bytes.length);
-					
-					// show photo
-					// Garbage collect in case VM Heap runs out of memory with decodeByteArray
-					System.gc();
-					image.setImageBitmap(BitmapFactory.decodeByteArray(photo_bytes, 0, photo_bytes.length));
 				}
+				// TODO marker
+				// enable buttons regardless of success or fail
+				// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
+				_enableButtons();
+			} else {
+				logMsg("can't press any buttons yet (in cameracloud)");
 			}
-
-			// enable buttons right now, not untill progressdialog timeout
-			// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
-			_enableButtons();
-		} catch (ClientProtocolException e1) {
-			logMsg("get photo ClientProtocolException");
-			e1.printStackTrace();
-		} catch (URISyntaxException e1) {
-			logMsg("get photo URISyntaxException");
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			logMsg("get photo IOException");
-			e1.printStackTrace();
 		}
+	};
 
-		logMsg("Done with Get photos button for region " + targetRegion);
-	}
 
 	/**
 	 * VCOREDAEMON STUFF
@@ -855,7 +773,6 @@ public class CameraCloud extends Activity implements LocationListener {
 	 * north-west-wards along Mass Ave.
 	 */
 	public void determineLocation(Location loc, RegionKey prevRegion) {
-		// TODO: make this work with Y as well
 		// currently determining region only depends on X
 
 		logMsg("INSIDE DETERMINELOCATION");
@@ -921,7 +838,6 @@ public class CameraCloud extends Activity implements LocationListener {
 
 		// find the current region
 		// Note: only depending on loc_x_rotated for this experiment
-		// TODO: for experiments involving a matrix of regions, add y
 		double current_region = (int) Math.floor(loc_x_rotated / region_width);
 		logMsg("location PINPOINTS to region = " + current_region
 				+ ", previous " + prevRegion.x);
@@ -960,51 +876,74 @@ public class CameraCloud extends Activity implements LocationListener {
 	 */
 
 	private CloudObject serverRequest(int client_req_int, int x, int y,
-			CloudObject cloudObj) throws URISyntaxException,
-			ClientProtocolException, IOException {
+			CloudObject cloudObj) {
 		// ref
 		// http://localtone.blogspot.com/2009/07/post-json-using-android-and-httpclient.html
 		InputStream data = null;
 		String url = String.format("http://" + Globals.CLOUD_SERVER_NAME
 				+ "/%d/%d/%d/", client_req_int, x, y);
 		logMsg("Server request to url: " + url);
+		
+		// we do NOT want timeouts because we want to show cloud is slow
+		// (http://stackoverflow.com/a/1565243 timeout stuff)
 		DefaultHttpClient httpclient = new DefaultHttpClient();
 		HttpPost httpost = new HttpPost(url);
 
-		JSONObject holder = new JSONObject();
+		//JSONObject holder = new JSONObject();
 		Gson gson_send = new Gson();
 
 		String cloudObj_gsonstring = gson_send.toJson(cloudObj);
 		logMsg("Cloud server request length: "
 				+ cloudObj_gsonstring.getBytes().length);
 
-		StringEntity se = new StringEntity(cloudObj_gsonstring);
+		StringEntity se;
+		try {
+			se = new StringEntity(cloudObj_gsonstring);
 
-		httpost.setEntity(se);
-		httpost.setHeader("Accept", "application/json");
-		httpost.setHeader("Content-type", "application/json");
+			httpost.setEntity(se);
+			httpost.setHeader("Accept", "application/json");
+			httpost.setHeader("Content-type", "application/json");
+			
+			logMsg("about to execute HTTP POST");
+			long startTime = System.currentTimeMillis();
 
-		logMsg("about to execute HTTP POST");
-		long startTime = System.currentTimeMillis();
-		HttpResponse response = httpclient.execute(httpost);
-		long stopTime = System.currentTimeMillis();
-		logMsg(String.format("Execute HTTP latency: %dms", stopTime - startTime));
+			HttpResponse response;
+			try {
+				logMsg("in serverRequest() about to httpclient.execute()");
+				response = httpclient.execute(httpost);
 
-		logMsg("finished executing HTTP POST, get data");
-		data = response.getEntity().getContent();
+				long stopTime = System.currentTimeMillis();
+				logMsg(String.format("Execute HTTP latency: %dms", stopTime - startTime));
 
-		logMsg("make input stream reader for data");
-		Reader r = new InputStreamReader(data);
+				logMsg("finished executing HTTP POST, get data");
+				data = response.getEntity().getContent();
 
-		// TODO: ADD TIME and add to DIPLOMA
-		logMsg("Cloud response length: "
-				+ response.getEntity().getContentLength());
+				logMsg("make input stream reader for data");
+				Reader r = new InputStreamReader(data);
 
-		Gson gson_ret = new Gson();
+				// TODO: ADD TIME and add to DIPLOMA
+				logMsg("Cloud response length: "
+						+ response.getEntity().getContentLength());
 
-		logMsg("Returning cloud object");
-		CloudObject returnedObject = gson_ret.fromJson(r, CloudObject.class);
+				Gson gson_ret = new Gson();
 
-		return returnedObject;
+				logMsg("Returning cloud object");
+				CloudObject returnedObject = gson_ret.fromJson(r, CloudObject.class);
+
+				return returnedObject;
+				
+			} catch (ClientProtocolException cpe) {
+				logMsg("error excuting HTTP POST, ClientProtocolException");
+				cpe.printStackTrace();
+			} catch (IOException ioe) {
+				logMsg("error excuting HTTP POST, IOException");
+				ioe.printStackTrace();
+			} 
+		} catch (UnsupportedEncodingException e) {
+			logMsg("Error making String Entity");
+			e.printStackTrace();
+		}
+
+		return null;
 	}
 }

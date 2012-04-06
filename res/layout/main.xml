@@ -124,6 +124,13 @@
             android:text="none" />
 
         <Button
+            android:id="@+id/get0_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 0 Get" />
+        
+        <Button
             android:id="@+id/get1_button"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -135,14 +142,7 @@
             android:layout_width="80dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
-            android:text="Reg 2 Get" />
-        
-        <Button
-            android:id="@+id/get3_button"
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="Reg 3 Get!" />
+            android:text="Reg 2 Get!" />
     </LinearLayout>
 
     <LinearLayout
@@ -157,7 +157,14 @@
             android:layout_height="50dip"
             android:padding="2dp"
             android:text="Take Pic" />
-
+        
+        <Button
+            android:id="@+id/get3_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 3 Get" />
+        
         <Button
             android:id="@+id/get4_button"
             android:layout_width="80dip"
@@ -172,12 +179,6 @@
             android:padding="2dp"
             android:text="Reg 5 Get" />
         
-        <Button
-            android:id="@+id/get6_button"
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="Reg 6 Get" />
 
     </LinearLayout>
 
