@@ -99,9 +99,12 @@ public class CameraCloud extends Activity implements LocationListener {
 	private int takeCamGood = 0; // # times got into the Camera callback
 	private int takeGoodSave = 0; // # "Take Picture" successes
 	private int takeBad = 0; // # "Take Picture" failures
+	private int takeException = 0;
 	private int getNum = 0; // # of times pressed "Get x Region"
 	private int getGood = 0; // # get success
 	private int getBad = 0; // # get failure
+	private int getException = 0;
+
 
 	// areButtonsEnabled is the first line of defense against multi-clicking
 	// set to false as soon as a take/get picture button is pressed
@@ -165,8 +168,8 @@ public class CameraCloud extends Activity implements LocationListener {
 
 	private void logCounts(){
 		logMsg("takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
-				+ " takeBad="+takeBad+ " getNum="+getNum
-				+ " getGood="+getGood+ " getBad="+getBad);
+				+ " takeBad="+takeBad+ " takeException="+takeException+ " getNum="+getNum
+				+ " getGood="+getGood+ " getBad="+getBad+ " getException="+getException);
 	}
 	
 	/**
@@ -1011,6 +1014,12 @@ public class CameraCloud extends Activity implements LocationListener {
 						Toast.LENGTH_SHORT);
 				toast.setGravity(Gravity.CENTER, 0,0);
 				toast.show();
+				if (client_req_int == CLIENT_UPLOAD_PHOTO) {
+					takeException += 1;
+				} else { // CLIENT_DOWNLOAD_PHOTO
+					getException += 1;
+				}
+				logCounts();
 			} catch (IOException ioe) {
 				logMsg("error excuting HTTP POST, IOException");
 				ioe.printStackTrace();
@@ -1020,6 +1029,12 @@ public class CameraCloud extends Activity implements LocationListener {
 						Toast.LENGTH_SHORT);
 				toast.setGravity(Gravity.CENTER, 0,0);
 				toast.show();
+				if (client_req_int == CLIENT_UPLOAD_PHOTO) {
+					takeException += 1;
+				} else { // CLIENT_DOWNLOAD_PHOTO
+					getException += 1;
+				}
+				logCounts();
 			} 
 		} catch (UnsupportedEncodingException e) {
 			logMsg("Error making String Entity");
@@ -1030,6 +1045,12 @@ public class CameraCloud extends Activity implements LocationListener {
 					Toast.LENGTH_SHORT);
 			toast.setGravity(Gravity.CENTER, 0,0);
 			toast.show();
+			if (client_req_int == CLIENT_UPLOAD_PHOTO) {
+				takeException += 1;
+			} else { // CLIENT_DOWNLOAD_PHOTO
+				getException += 1;
+			}
+			logCounts();
 		}
 
 		return null;
