@@ -14,6 +14,9 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -553,13 +556,6 @@ public class CameraCloud extends Activity implements LocationListener {
 				// Analogous to Camera DIPLOMA's
 				// "case Packet.CLIENT_UPLOAD_PHOTO_ACK"
 
-				// latency stuff
-				long upload_end = System.currentTimeMillis();
-				long latency = upload_end - upload_start;
-				logMsg("CameraCloud upload new photo latency = " + latency);
-				logMsg("CameraCloud upload start " + upload_start + " ~ stop "
-						+ upload_end);
-
 				// see if it was unsuccessful
 				if (co_return.status == CloudObject.CR_ERROR) {
 					logMsg("FAIL! Client now knows saving photo on cloud server failed");
@@ -699,13 +695,6 @@ public class CameraCloud extends Activity implements LocationListener {
 					// Processing the return from the cloud
 					// Analogous to Camera DIPLOMA's
 					// "case Packet.CLIENT_SHOW_REMOTEPHOTO"
-
-					// latency stuff
-					long download_end = System.currentTimeMillis();
-					long latency = download_end - download_start;
-					logMsg("CameraCloud download photo latency = " + latency);
-					logMsg("CameraCloud download start " + download_start + " ~ stop "
-							+ download_end);
 
 					// see if it was unsuccessful
 					if (co_return.status == CloudObject.CR_ERROR) {
@@ -946,9 +935,24 @@ public class CameraCloud extends Activity implements LocationListener {
 				+ "/%d/%d/%d/", client_req_int, x, y);
 		logMsg("Server request to url: " + url);
 		
-		// we do NOT want timeouts because we want to show cloud is slow
-		// (http://stackoverflow.com/a/1565243 timeout stuff)
 		DefaultHttpClient httpclient = new DefaultHttpClient();
+
+		/* we do NOT want timeouts because we want to show cloud is slow
+		// (http://stackoverflow.com/a/1565243 timeout stuff)
+		HttpParams httpParameters = new BasicHttpParams();
+		
+		// Set the timeout in milliseconds until a connection is established.
+		// The default value is zero, that means the timeout is not used. 
+		int timeoutConnection = 10000;
+		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
+		// Set the default socket timeout (SO_TIMEOUT) 
+		// in milliseconds which is the timeout for waiting for data.
+		int timeoutSocket = 20000;
+		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
+
+		DefaultHttpClient httpclient = new DefaultHttpClient(httpParameters);
+		//DefaultHttpClient httpclient = new DefaultHttpClient();
+		 */
 		HttpPost httpost = new HttpPost(url);
 
 		//JSONObject holder = new JSONObject();
@@ -975,8 +979,12 @@ public class CameraCloud extends Activity implements LocationListener {
 				response = httpclient.execute(httpost);
 
 				long stopTime = System.currentTimeMillis();
-				logMsg(String.format("CameraCloud Execute HTTP latency: %dms", stopTime - startTime));
-
+				if (client_req_int == CLIENT_UPLOAD_PHOTO) {
+					logMsg(String.format("CameraCloud Execute HTTP Upload latency: %dms", stopTime - startTime));
+				} else { // CLIENT_DOWNLOAD_PHOTO
+					logMsg(String.format("CameraCloud Execute HTTP Download latency: %dms", stopTime - startTime));
+				}
+					
 				logMsg("finished executing HTTP POST, get data");
 				data = response.getEntity().getContent();
 
@@ -997,13 +1005,31 @@ public class CameraCloud extends Activity implements LocationListener {
 			} catch (ClientProtocolException cpe) {
 				logMsg("error excuting HTTP POST, ClientProtocolException");
 				cpe.printStackTrace();
+				_enableButtons();
+				CharSequence text = "Cloud Failed due to ClientProtocolException";
+				Toast toast = Toast.makeText(getApplicationContext(), text,
+						Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.CENTER, 0,0);
+				toast.show();
 			} catch (IOException ioe) {
 				logMsg("error excuting HTTP POST, IOException");
 				ioe.printStackTrace();
+				_enableButtons();
+				CharSequence text = "Cloud Failed due to IOException";
+				Toast toast = Toast.makeText(getApplicationContext(), text,
+						Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.CENTER, 0,0);
+				toast.show();
 			} 
 		} catch (UnsupportedEncodingException e) {
 			logMsg("Error making String Entity");
 			e.printStackTrace();
+			_enableButtons();
+			CharSequence text = "Cloud Failed due to UnsupportedEncodingException";
+			Toast toast = Toast.makeText(getApplicationContext(), text,
+					Toast.LENGTH_SHORT);
+			toast.setGravity(Gravity.CENTER, 0,0);
+			toast.show();
 		}
 
 		return null;
