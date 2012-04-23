@@ -1004,7 +1004,8 @@ public class CameraCloud extends Activity implements LocationListener {
 				CloudObject returnedObject = gson_ret.fromJson(r, CloudObject.class);
 
 				return returnedObject;
-				
+			
+				// Note: Exceptions do not produce latencies!
 			} catch (ClientProtocolException cpe) {
 				logMsg("error excuting HTTP POST, ClientProtocolException");
 				cpe.printStackTrace();

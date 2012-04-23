@@ -22,17 +22,18 @@ public class Globals {
 		
 		// to calculate start point & road angle:
 		// Endpoints on (straight) Mass Ave to calculate theta
-		// Central Mass Ave
+		/* Central Mass Ave
 		final static public double NW_LONG = -71.104888;
 		final static public double NW_LAT = 42.365944;
 		final static public double SE_LONG = -71.100005;
 		final static public double SE_LAT = 42.363492;
-
-		/* 77 Mass Ave
-		final double north_west_loc_long = -71.093881;
-		final double north_west_loc_lat = 42.359644;
-		final double south_east_loc_long = -71.092894;
-		final double south_east_loc_lat = 42.357741;*/
+		*/
+		
+		// 77 Mass Ave
+		final static public double NW_LONG = -71.093881;
+		final static public double NW_LAT = 42.359644;
+		final static public double SE_LONG = -71.092894;
+		final static public double SE_LAT = 42.357741;
 
 		
 		final static public int NTHREADS=1;
