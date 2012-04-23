@@ -220,6 +220,56 @@
             android:text="failures: 0" >
         </TextView>
     </LinearLayout>
+    
+       <LinearLayout
+        android:id="@+id/CountInfoLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/takeNum_tv"
+            android:layout_width="50dip"
+            android:layout_height="wrap_content"
+            android:text="t 0" >
+        </TextView>
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/takeGood_tv"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:text="t:) 0" >
+        </TextView>
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/takePercent_tv"
+            android:layout_width="70dip"
+            android:layout_height="wrap_content"
+            android:text="t% 0" >
+        </TextView>
+        
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/getNum_tv"
+            android:layout_width="50dip"
+            android:layout_height="wrap_content"
+            android:text="g 0" >
+        </TextView>
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/getGood_tv"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:text="g:) 0" >
+        </TextView>
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/getPercent_tv"
+            android:layout_width="50dip"
+            android:layout_height="wrap_content"
+            android:text="g% 0" >
+        </TextView>
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/RegionButtonsLayout"

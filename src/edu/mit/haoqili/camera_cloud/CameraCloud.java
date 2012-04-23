@@ -49,6 +49,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+//import csail.mit.edu.diplomamatrix.R;
+
 public class CameraCloud extends Activity implements LocationListener {
 	final static private String TAG = "CameraCloud";
 
@@ -81,9 +83,11 @@ public class CameraCloud extends Activity implements LocationListener {
 	Button camera_button, region_button, my_camera_button;
 	Button get0_button, get1_button, get2_button, get3_button, get4_button, get5_button;
 	TextView opCountTv, successCountTv, failureCountTv;
-	TextView regionTv;
 	EditText regionText, threadsText;
 	ListView msgList;
+	TextView takeNumTv, takeGoodTv, takePercentTv;
+	TextView getNumTv, getGoodTv, getPercentTv;
+	TextView idTv, stateTv, regionTv, leaderTv;
 	ArrayAdapter<String> receivedMessages;
 	CameraSurfaceView cameraSurfaceView;
 
@@ -170,6 +174,22 @@ public class CameraCloud extends Activity implements LocationListener {
 		logMsg("takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
 				+ " takeBad="+takeBad+ " takeException="+takeException+ " getNum="+getNum
 				+ " getGood="+getGood+ " getBad="+getBad+ " getException="+getException);
+		takeNumTv.setText("t " + takeNum);
+		takeGoodTv.setText("t:) " + takeGoodSave);
+		if (takeNum!=0){
+			double takePercent = 100.0*takeGoodSave / (1.0*takeNum);
+			int tPercent = (int) takePercent;
+			takePercentTv.setText("t% " + tPercent);
+		}
+		
+		getNumTv.setText("g " + getNum);
+		getGoodTv.setText("g:) " + getGood);
+		if (getNum!=0){
+			double getPercent = 100.0*getGood / (1.0*getNum);
+			int gPercent = (int) getPercent;
+			getPercentTv.setText("g% " + gPercent);
+		}
+	
 	}
 	
 	/**
@@ -178,10 +198,9 @@ public class CameraCloud extends Activity implements LocationListener {
 	 */
 	private Runnable disableButtonsProgressStartR = new Runnable() {
 		public void run() {
-			Log.i(TAG,
-					"Inside disableButtonsR XXX");
+			logMsg("Inside disableButtonsR XXX");
 			areButtonsEnabled = false;
-			Log.i(TAG, "areButtonsEnabled --> false");
+			logMsg("areButtonsEnabled --> false");
 			progressDialog = ProgressDialog.show(CameraCloud.this, "",
 					"Processing photo get or save to cloud server ... :)");
 		}
@@ -307,6 +326,14 @@ public class CameraCloud extends Activity implements LocationListener {
 		opCountTv = (TextView) findViewById(R.id.opcount_tv);
 		successCountTv = (TextView) findViewById(R.id.successcount_tv);
 		failureCountTv = (TextView) findViewById(R.id.failurecount_tv);
+		
+		// Text views
+		takeNumTv = (TextView) findViewById(R.id.takeNum_tv);
+		takeGoodTv = (TextView) findViewById(R.id.takeGood_tv);
+		takePercentTv = (TextView) findViewById(R.id.takePercent_tv);
+		getNumTv = (TextView) findViewById(R.id.getNum_tv);
+		getGoodTv = (TextView) findViewById(R.id.getGood_tv);
+		getPercentTv = (TextView) findViewById(R.id.getPercent_tv);
 
 		regionText = (EditText) findViewById(R.id.region_text);
 
@@ -362,7 +389,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			// we're running from within the simulator, so use given id and
 			// start benchmark after a delay
 			id = Long.valueOf(extras.getString("id"));
-			Log.i("Status Activity, getting id = ", String.valueOf(id));
+			logMsg("Status Activity, getting id = "+String.valueOf(id));
 		}
 
 		// enable button pressing
@@ -567,6 +594,7 @@ public class CameraCloud extends Activity implements LocationListener {
 							Toast.LENGTH_SHORT);
 					toast.setGravity(Gravity.CENTER, 0,0);
 					toast.show();
+					// ANIRUDH: Why isn't anything incremented here ??
 				} else { // CloudObject.CR_OKAY:
 					
 					// count it
@@ -603,7 +631,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		_enableButtons();
 		
 		if (!isSaveSuccess){
-			takeBad += 1;
+			takeBad += 1; // ANIRUDH: Ok it's incremented here. 
 			logCounts();
 			logMsg("takeBad++");
 		}
@@ -649,7 +677,6 @@ public class CameraCloud extends Activity implements LocationListener {
 				areButtonsEnabled = false;
 				logMsg("areButtonsEnabled --> false ");
 				logMsg("Inside get photo disableButtons XXX");
-				// TODO: marker
 				// progressDialog not showing due to the massive amount of stuff that follows
 				// http://stackoverflow.com/questions/2798443/android-progressdialog-doesnt-show
 				// but users can't press buttons either, so hopefully it's going to be okay
@@ -764,9 +791,7 @@ public class CameraCloud extends Activity implements LocationListener {
 					toast.setGravity(Gravity.CENTER, 0,0);
 					toast.show();
 				}
-				// TODO marker
 				// enable buttons regardless of success or fail
-				// myHandler.removeCallbacks(buttonsEnableProgressTimeoutR);
 				_enableButtons();
 				
 				if (!isGetSuccess){
@@ -977,6 +1002,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			long startTime = System.currentTimeMillis();
 
 			HttpResponse response;
+			// TODO: Where is the time out set ?
 			try {
 				logMsg("in serverRequest() about to httpclient.execute()");
 				response = httpclient.execute(httpost);
