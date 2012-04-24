@@ -102,10 +102,12 @@ public class CameraCloud extends Activity implements LocationListener {
 	private int takeNum = 0; // # of times pressed "Take Picture"
 	private int takeCamGood = 0; // # times got into the Camera callback
 	private int takeGoodSave = 0; // # "Take Picture" successes
+	// the difference of takeBad - takeException = successful replies but bad
 	private int takeBad = 0; // # "Take Picture" failures
 	private int takeException = 0;
 	private int getNum = 0; // # of times pressed "Get x Region"
 	private int getGood = 0; // # get success
+	// the difference of getBad - getException = successful replies but bad
 	private int getBad = 0; // # get failure
 	private int getException = 0;
 
@@ -171,7 +173,8 @@ public class CameraCloud extends Activity implements LocationListener {
 	}
 
 	private void logCounts(){
-		logMsg("takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
+		logMsg("reg="+myRegion.x
+				+ "takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
 				+ " takeBad="+takeBad+ " takeException="+takeException+ " getNum="+getNum
 				+ " getGood="+getGood+ " getBad="+getBad+ " getException="+getException);
 		takeNumTv.setText("t " + takeNum);
@@ -631,6 +634,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		_enableButtons();
 		
 		if (!isSaveSuccess){
+			// the difference of takeBad - takeException = successful replies but bad
 			takeBad += 1; // ANIRUDH: Ok it's incremented here. 
 			logCounts();
 			logMsg("takeBad++");
@@ -795,6 +799,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				_enableButtons();
 				
 				if (!isGetSuccess){
+					// the difference of getBad - getException = successful replies but bad
 					getBad += 1;
 					logCounts();
 					logMsg("getBad++");
@@ -963,24 +968,24 @@ public class CameraCloud extends Activity implements LocationListener {
 				+ "/%d/%d/%d/", client_req_int, x, y);
 		logMsg("Server request to url: " + url);
 		
-		DefaultHttpClient httpclient = new DefaultHttpClient();
+		//DefaultHttpClient httpclient = new DefaultHttpClient();
 
-		/* we do NOT want timeouts because we want to show cloud is slow
+		// we do NOT want timeouts because we want to show cloud is slow
 		// (http://stackoverflow.com/a/1565243 timeout stuff)
 		HttpParams httpParameters = new BasicHttpParams();
 		
 		// Set the timeout in milliseconds until a connection is established.
 		// The default value is zero, that means the timeout is not used. 
-		int timeoutConnection = 10000;
+		int timeoutConnection = Globals.TIMEOUTCONNECTION;
 		HttpConnectionParams.setConnectionTimeout(httpParameters, timeoutConnection);
 		// Set the default socket timeout (SO_TIMEOUT) 
 		// in milliseconds which is the timeout for waiting for data.
-		int timeoutSocket = 20000;
+		int timeoutSocket = Globals.TIMEOUTSOCKET;
 		HttpConnectionParams.setSoTimeout(httpParameters, timeoutSocket);
 
 		DefaultHttpClient httpclient = new DefaultHttpClient(httpParameters);
 		//DefaultHttpClient httpclient = new DefaultHttpClient();
-		 */
+		 
 		HttpPost httpost = new HttpPost(url);
 
 		//JSONObject holder = new JSONObject();
@@ -1032,7 +1037,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				return returnedObject;
 			
 				// Note: Exceptions do not produce latencies!
-			} catch (ClientProtocolException cpe) {
+			} /*catch (ClientProtocolException cpe) {
 				logMsg("error excuting HTTP POST, ClientProtocolException");
 				cpe.printStackTrace();
 				_enableButtons();
@@ -1062,7 +1067,26 @@ public class CameraCloud extends Activity implements LocationListener {
 					getException += 1;
 				}
 				logCounts();
-			} 
+			} */
+			catch (Exception e) {
+				logMsg("Some other exception \n");
+				logMsg(e.getMessage());
+				e.printStackTrace();
+				_enableButtons();
+				CharSequence text = "Cloud Failed due to some other Exception, maybe timeout";
+				Toast toast = Toast.makeText(getApplicationContext(),e.getMessage(),
+						Toast.LENGTH_SHORT);
+				toast.setGravity(Gravity.CENTER, 0,0);
+				toast.show();
+				if (client_req_int == CLIENT_UPLOAD_PHOTO) {
+					takeException += 1;
+				} else { // CLIENT_DOWNLOAD_PHOTO
+					getException += 1;
+				}
+				logCounts();
+				
+			}
+
 		} catch (UnsupportedEncodingException e) {
 			logMsg("Error making String Entity");
 			e.printStackTrace();

@@ -10,12 +10,17 @@ public class Globals {
 		final static public int JPEG_SAMPLE_SIZE = 12; // if too low, will cause Nexus S out of memory!
 
 		// cloud server
-    	final static public String CLOUD_SERVER_NAME="hermes5.csail.mit.edu:8213";
+    	final static public String CLOUD_SERVER_NAME="18.111.14.105:8213";
     
+    	// timeout stuff
+    	final static public int TIMEOUTCONNECTION = 60000;
+    	final static public int TIMEOUTSOCKET = 60000;
 	
 		// new region calculations
 		// road parameters, used to calculate region width
-		final static public double PHONE_RANGE_METERS = 60; // diagonal of region
+        // sqrt(30^2+15^2), 21 meters is the max linearly on 77 Mass Ave, 
+        // and we want PHONE_RANGE_METERS to span 2 regions, but 10.5 meters is too short
+        final static public double PHONE_RANGE_METERS=33;
 		final static public double ROAD_WIDTH_METERS = 30;
 		// to calculate buffer zone
 		final static public double REGION_WIDTH_BOUNDARY_METERS = 5;
