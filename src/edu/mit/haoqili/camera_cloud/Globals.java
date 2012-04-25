@@ -10,20 +10,18 @@ public class Globals {
 		final static public int JPEG_SAMPLE_SIZE = 12; // if too low, will cause Nexus S out of memory!
 
 		// cloud server
-    	final static public String CLOUD_SERVER_NAME="18.111.14.105:8213";
+    	final static public String CLOUD_SERVER_NAME="128.30.87.232:8213";
     
     	// timeout stuff
     	final static public int TIMEOUTCONNECTION = 60000;
     	final static public int TIMEOUTSOCKET = 60000;
 	
-		// new region calculations
-		// road parameters, used to calculate region width
-        // sqrt(30^2+15^2), 21 meters is the max linearly on 77 Mass Ave, 
-        // and we want PHONE_RANGE_METERS to span 2 regions, but 10.5 meters is too short
-        final static public double PHONE_RANGE_METERS=33;
+		// region calculations
+        // 21 meters is the max linearly on 77 Mass Ave, 
+        // ideally we want REGION_WIDTH to span 2 regions, but 10.5 meters is too short
+        static public double REGION_WIDTH=21; // This can be changed from UI
 		final static public double ROAD_WIDTH_METERS = 30;
-		// to calculate buffer zone
-		final static public double REGION_WIDTH_BOUNDARY_METERS = 5;
+		static public boolean HASHYSTERESIS = false; // can be changed from UI 
 		
 		// to calculate start point & road angle:
 		// Endpoints on (straight) Mass Ave to calculate theta
@@ -52,19 +50,8 @@ public class Globals {
         final static public String BROADCAST_ADDRESS="192.168.5.255"; //.255.255 also works
 
         
-        // old region calculations
-        final static public int REGION_WIDTH=17; // in meters, 35/2
-        final static public int SOUTHEAST_LONG = -7110000;
-        final static public int SOUTHEAST_LAT = 4236349;
-        // Long is x
-        final static public int MAX_X_REGIONS=6;
-        final static public int MAX_Y_REGIONS=1;
-        final static public int MINIMUM_LONGITUDE=SOUTHEAST_LONG - REGION_WIDTH*MAX_X_REGIONS;
-        final static public int MINIMUM_LATITUDE=SOUTHEAST_LAT;
-        
         // region constraints, for the UI
-        final static public int MIN_REGION = 0;
-        final static public int MAX_REGION = MAX_X_REGIONS-1;
+        final static public int MAX_REGION = 5;
         
         final static public int SPARSE_NUM_ITER=100000;
 

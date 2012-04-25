@@ -10,7 +10,6 @@ import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -38,12 +37,15 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -80,16 +82,19 @@ public class CameraCloud extends Activity implements LocationListener {
 	}
 
 	// UI elements
-	Button camera_button, region_button, my_camera_button;
+	Button my_camera_button;
+	Button width_button;
 	Button get0_button, get1_button, get2_button, get3_button, get4_button, get5_button;
+	Button sreg0, sreg1, sreg2, sreg3, sreg4, sreg5;
 	TextView opCountTv, successCountTv, failureCountTv;
-	EditText regionText, threadsText;
+	EditText widthText;
 	ListView msgList;
 	TextView takeNumTv, takeGoodTv, takePercentTv;
 	TextView getNumTv, getGoodTv, getPercentTv;
 	TextView idTv, stateTv, regionTv, leaderTv;
 	ArrayAdapter<String> receivedMessages;
 	CameraSurfaceView cameraSurfaceView;
+	Spinner spinner;
 
 	PowerManager.WakeLock wl = null;
 	LocationManager lm;
@@ -123,10 +128,6 @@ public class CameraCloud extends Activity implements LocationListener {
 
 	// VCore Daemon Location Constants
 	private RegionKey myRegion;
-	private static final int regionWidth = Globals.REGION_WIDTH; // ~meters
-	// lat / long * 10^5, e.g. 103.77900 becomes 10377900
-	private static final int minLatitude = Globals.MINIMUM_LATITUDE;
-	private static final int minLongitude = Globals.MINIMUM_LONGITUDE;
 
 	// Message types
 	protected final static int LOG_NODISPLAY = 27;
@@ -173,7 +174,8 @@ public class CameraCloud extends Activity implements LocationListener {
 	}
 
 	private void logCounts(){
-		logMsg("reg="+myRegion.x
+		logMsg("reg="+myRegion.x 
+				+ " regionWidth="+Globals.REGION_WIDTH + " hyst="+Globals.HASHYSTERESIS
 				+ "takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
 				+ " takeBad="+takeBad+ " takeException="+takeException+ " getNum="+getNum
 				+ " getGood="+getGood+ " getBad="+getBad+ " getException="+getException);
@@ -232,15 +234,11 @@ public class CameraCloud extends Activity implements LocationListener {
 			toast.show();
 			return false;
 		}
-		if (myRegion.x < Globals.MIN_REGION || myRegion.x > Globals.MAX_REGION) {
-			logMsg("canPressButton = false. Can't press button because you're not at a valid region: "
-					+ Globals.MIN_REGION
-					+ " ~ "
+		if (myRegion.x < 0 || myRegion.x > Globals.MAX_REGION) {
+			logMsg("canPressButton = false. Can't press button because you're not at a valid region: 0 ~ "
 					+ Globals.MAX_REGION
 					+ ". You're at " + myRegion.x);
-			CharSequence text = "Can't press button because you're not at a valid region: "
-					+ Globals.MIN_REGION
-					+ " ~ "
+			CharSequence text = "Can't press button because you're not at a valid region: 0 ~ "
 					+ Globals.MAX_REGION
 					+ ". You're at " + myRegion.x;
 			Toast toast = Toast.makeText(getApplicationContext(), text,
@@ -269,11 +267,18 @@ public class CameraCloud extends Activity implements LocationListener {
 		long initRx = -1;
 		long initRy = -1;
 		myRegion = new RegionKey(initRx, initRy);
-
+		
+		// Hysteresis Spinner
+		Spinner spinner = (Spinner) findViewById(R.id.hysteresis_spinner);
+	    ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+	            this, R.array.spinner_choices, android.R.layout.simple_spinner_item);
+	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+	    spinner.setAdapter(adapter);
+	    spinner.setOnItemSelectedListener(new HysteresisSpinnerListener());
+		
 		// Buttons
-		region_button = (Button) findViewById(R.id.region_button);
-		region_button.setOnClickListener(region_button_listener);
-		camera_button = (Button) findViewById(R.id.camera_button);
+		width_button = (Button) findViewById(R.id.width_button);
+		width_button.setOnClickListener(width_button_listener);
 		get0_button = (Button) findViewById(R.id.get0_button);
 		get0_button.setOnClickListener(get_button_listener);
 		get1_button = (Button) findViewById(R.id.get1_button);
@@ -286,6 +291,19 @@ public class CameraCloud extends Activity implements LocationListener {
 		get4_button.setOnClickListener(get_button_listener);
 		get5_button = (Button) findViewById(R.id.get5_button);
 		get5_button.setOnClickListener(get_button_listener);
+		sreg0 = (Button) findViewById(R.id.reg0);
+		sreg0.setOnClickListener(set_reg_listener);
+		sreg1 = (Button) findViewById(R.id.reg1);
+		sreg1.setOnClickListener(set_reg_listener);
+		sreg2 = (Button) findViewById(R.id.reg2);
+		sreg2.setOnClickListener(set_reg_listener);
+		sreg3 = (Button) findViewById(R.id.reg3);
+		sreg3.setOnClickListener(set_reg_listener);
+		sreg4 = (Button) findViewById(R.id.reg4);
+		sreg4.setOnClickListener(set_reg_listener);
+		sreg5 = (Button) findViewById(R.id.reg5);
+		sreg5.setOnClickListener(set_reg_listener);
+
 
 		// Setup the FrameLayout with the Camera Preview Screen
 		cameraSurfaceView = new CameraSurfaceView(this);
@@ -338,7 +356,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		getGoodTv = (TextView) findViewById(R.id.getGood_tv);
 		getPercentTv = (TextView) findViewById(R.id.getPercent_tv);
 
-		regionText = (EditText) findViewById(R.id.region_text);
+		widthText = (EditText) findViewById(R.id.width_text);
 
 		// Text views
 		regionTv = (TextView) findViewById(R.id.region_tv);
@@ -402,7 +420,16 @@ public class CameraCloud extends Activity implements LocationListener {
 		logMsg("*** Application started ***");
 
 	} // end OnCreate()
-
+	
+	// Called by HysteresisSpinnerListener
+	public static void changeHysteresis(String str){
+		if (str.equals("Hysteresis_ON")){
+			Globals.HASHYSTERESIS = true;
+		} else {
+			Globals.HASHYSTERESIS = false;
+		}
+	}
+	
 	/**
 	 * onResume is is always called after onStart, even if userApp's not paused
 	 */
@@ -459,32 +486,48 @@ public class CameraCloud extends Activity implements LocationListener {
 
 	/*** UI Callbacks for Buttons, etc. ***/
 	// UI callback for "Set Region" button.
-	private OnClickListener region_button_listener = new OnClickListener() {
+	private OnClickListener width_button_listener = new OnClickListener() {
 		public void onClick(View v) {
-			String strX = regionText.getText().toString();
-			if (strX.equals("")) {
-				logMsg("please input a region");
-				CharSequence text = "please input a region";
-				Toast toast = Toast.makeText(getApplicationContext(), text,
-						Toast.LENGTH_SHORT);
+			String strX = widthText.getText().toString();
+			if (strX.equals("")){
+				logMsg("please input some width");
+				CharSequence text = "please input a width";
+				Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
 				toast.setGravity(Gravity.CENTER, 0,0);
 				toast.show();
 			} else {
 				int rX = Integer.parseInt(strX);
-				int rY = 0;
-				if (rX < Globals.MIN_REGION || rX > Globals.MAX_REGION) {
-					logMsg("please input a region between "
-							+ Globals.MIN_REGION + " ~ " + Globals.MAX_REGION);
-					CharSequence text = "please input a region between "
-							+ Globals.MIN_REGION + " ~ " + Globals.MAX_REGION;
-					Toast toast = Toast.makeText(getApplicationContext(), text,
-							Toast.LENGTH_SHORT);
-					toast.setGravity(Gravity.CENTER, 0,0);
-					toast.show();
-				} else {
-					changeRegion(new RegionKey(rX, rY));
-				}
+				Globals.REGION_WIDTH = rX;
+				logMsg("Region width is changed to: " + rX);
 			}
+		}
+	};
+	private OnClickListener set_reg_listener = new OnClickListener(){
+		public void onClick(View v){
+			
+			long newRegion = -1;
+			switch(v.getId()){
+			case R.id.reg0:
+				newRegion = 0;
+				break;
+			case R.id.reg1:
+				newRegion = 1;
+				break;
+			case R.id.reg2:
+				newRegion = 2;
+				break;
+			case R.id.reg3:
+				newRegion = 3;
+				break;
+			case R.id.reg4:
+				newRegion = 4;
+				break;
+			case R.id.reg5:
+				newRegion = 5;
+				break;
+			}
+		
+			changeRegion(new RegionKey(newRegion, 0));
 		}
 	};
 
@@ -498,7 +541,6 @@ public class CameraCloud extends Activity implements LocationListener {
 	public void onLocationChanged(Location loc) {
 		logMsg(".......... GPS onLocationChanged ...... ");
 		if (loc != null) {
-			// checkLocation(loc);
 			determineLocation(loc, myRegion);
 		} else {
 			logMsg("Null Location");
@@ -832,32 +874,6 @@ public class CameraCloud extends Activity implements LocationListener {
 				newRegion));
 	}
 
-	public void checkLocation(Location loc) {
-		if (loc == null)
-			return;
-
-		// round to 5th decimal place (approx 1 meter at equator)
-		long mX = Math.round((loc.getLongitude() * 100000) - minLongitude);
-		long mY = Math.round((loc.getLatitude() * 100000) - minLatitude);
-		logMsg(String.format(
-				"GPS lat,long: %f,%f mapping to cartesian x,y: %d,%d",
-				loc.getLongitude(), loc.getLatitude(), mX, mY));
-
-		// Determine what region we're in now
-		// and if we've entered a new region since last check, take action
-		/*
-		 * long rx = mX / regionWidth; long ry = mY / regionWidth; RegionKey
-		 * newRegion = new RegionKey(rx, ry); if (!newRegion.equals(myRegion))
-		 * changeRegion(newRegion);
-		 */
-		long rx = Math.round(mX / regionWidth);
-		// long ry = mY / regionWidth;
-		RegionKey newRegion = new RegionKey(rx, 0);
-		if (!newRegion.equals(myRegion))
-			changeRegion(newRegion);
-
-	}
-
 	/*
 	 * Region 0 starts at south-east point and increments one by one
 	 * north-west-wards along Mass Ave.
@@ -872,8 +888,8 @@ public class CameraCloud extends Activity implements LocationListener {
 		double power = 100000;
 
 		// x-width of a rectangular region
-		double region_width = Math.sqrt(Math.pow(Globals.PHONE_RANGE_METERS, 2)
-				- Math.pow(Globals.ROAD_WIDTH_METERS, 2));
+		double region_width = Globals.REGION_WIDTH;
+		
 		logMsg("GPS x/long:" + locx + ", GPS y/lat: " + locy
 				+ ". Region width in x: " + region_width);
 
@@ -926,18 +942,30 @@ public class CameraCloud extends Activity implements LocationListener {
 		logMsg("location PINPOINTS to region = " + current_region
 				+ ", previous " + prevRegion.x);
 
-		double region_width_boundary = Globals.REGION_WIDTH_BOUNDARY_METERS;
-		// check if it's inside boundary of region
-		// region_width_boundary is defined as the boundary from the edge of
-		// region to edge of boundary
-		// i.e. the total boundary length surrounding an edge is 2*this value
-		if ((fractionMod(loc_x_rotated, region_width) < region_width_boundary)
-				|| (fractionMod(region_width - loc_x_rotated, region_width) < region_width_boundary)) {
-			logMsg("location is INSIDE BOUNDARY, stay at prev region = "
-					+ prevRegion);
+		if (Globals.HASHYSTERESIS){
+			logMsg("hasHysteresis = true");
+			double region_width_boundary = region_width*0.1;
+			// check if it's inside boundary of region
+			// region_width_boundary is defined as the boundary from the edge of
+			// region to edge of boundary
+			// i.e. the total boundary length surrounding an edge is 2*this value
+			if ((fractionMod(loc_x_rotated, region_width) < region_width_boundary)
+					|| (fractionMod(region_width - loc_x_rotated, region_width) < region_width_boundary)) {
+				logMsg("location is INSIDE BOUNDARY, stay at prev region = " + prevRegion);
+				
+			} else { // outside boundary
+				// check that prev region and new region are different
+				RegionKey new_region = new RegionKey((int) current_region, 0);
+				if (Math.abs(new_region.x - prevRegion.x) == 0) {
+					logMsg("stay at region " + prevRegion.x);
+				} else {
+					logMsg("location CHANGED TO NEW region = " + new_region
+							+ " from region = " + prevRegion);
+					changeRegion(new_region);
+				}
+			}
 		} else {
-			// outside boundary
-
+			logMsg("hasHysteresis = false");
 			// check that prev region and new region are different
 			RegionKey new_region = new RegionKey((int) current_region, 0);
 			if (Math.abs(new_region.x - prevRegion.x) == 0) {

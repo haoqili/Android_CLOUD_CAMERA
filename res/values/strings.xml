@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">aaaCameraCloud</string>
+    
+    <string name="spinner_prompt">Hysteresis</string>
+    <string-array name="spinner_choices">
+        <item>Hysteresis_ON</item>
+        <item>Hysteresis_OFF</item>
+    </string-array>
 </resources>

@@ -89,6 +89,7 @@
             android:id="@+id/region_tv"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
+            android:textColor="#D41D19"
             android:text="Region" >
         </TextView>
 
@@ -182,13 +183,78 @@
 
     </LinearLayout>
 
+    <!-- space holder -->
+    <LinearLayout
+        android:id="@+id/RegionSet"
+        android:layout_width="fill_parent"
+        android:layout_height="20dip"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/regg"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/RegionSet"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/reg0"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="0" />
+        
+        <Button
+            android:id="@+id/reg1"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="1" />
+
+        <Button
+            android:id="@+id/reg2"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="2" />
+        
+        <Button
+            android:id="@+id/reg3"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="3" />
+                
+        <Button
+            android:id="@+id/reg4"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="4" />
+        
+        <Button
+            android:id="@+id/reg5"
+            android:layout_width="60dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="5" />
+        
+    </LinearLayout>
+    
     <ListView
         android:id="@+id/msgList"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1"
         android:stackFromBottom="true"
-        android:transcriptMode="alwaysScroll" >
+        android:transcriptMode="normal" >
     </ListView>
 
     <LinearLayout
@@ -243,7 +309,7 @@
         <TextView
             style="@style/CloudText"
             android:id="@+id/takePercent_tv"
-            android:layout_width="70dip"
+            android:layout_width="60dip"
             android:layout_height="wrap_content"
             android:text="t% 0" >
         </TextView>
@@ -272,23 +338,36 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/RegionButtonsLayout"
+        android:id="@+id/SetParameters"
         android:layout_width="fill_parent"
         android:layout_height="40dip"
         android:orientation="horizontal" >
 
-        <EditText
+        <!--<EditText
             android:id="@+id/region_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:inputType="number" />-->
+       
+       <EditText
+            android:id="@+id/width_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:inputType="number" />
-
+        
         <Button
-            android:id="@+id/region_button"
+            android:id="@+id/width_button"
             android:layout_width="90dip"
             android:layout_height="match_parent"
-            android:text="Set Region" />
+            android:text="Width" />
+        
+        <Spinner
+            android:id="@+id/hysteresis_spinner"
+            android:layout_width="60dip"
+            android:layout_height="match_parent"
+            android:prompt="@string/spinner_prompt"/>
     </LinearLayout>
 
 </LinearLayout>
