@@ -85,7 +85,9 @@ public class CameraCloud extends Activity implements LocationListener {
 	Button my_camera_button;
 	Button width_button;
 	Button get0_button, get1_button, get2_button, get3_button, get4_button, get5_button;
+	Button hyst_show;
 	Button sreg0, sreg1, sreg2, sreg3, sreg4, sreg5;
+
 	TextView opCountTv, successCountTv, failureCountTv;
 	EditText widthText;
 	ListView msgList;
@@ -196,7 +198,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		
 		logMsg("reg="+myRegion.x 
 				+ " regionWidth="+Globals.REGION_WIDTH + " hyst="+Globals.HYSTERESIS
-				+ "takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
+				+ " takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
 				+ " takeBad="+takeBad+ " takeException="+takeException+ " takePercent="+tPercent+"%"
 				
 				+ " getNum="+getNum+ " getGood="+getGood+ " getBad="+getBad
@@ -299,6 +301,9 @@ public class CameraCloud extends Activity implements LocationListener {
 		get4_button.setOnClickListener(get_button_listener);
 		get5_button = (Button) findViewById(R.id.get5_button);
 		get5_button.setOnClickListener(get_button_listener);
+		hyst_show = (Button) findViewById(R.id.hyst_button);
+		hyst_show.setOnClickListener(hyst_show_listener);
+		
 		sreg0 = (Button) findViewById(R.id.reg0);
 		sreg0.setOnClickListener(set_reg_listener);
 		sreg1 = (Button) findViewById(R.id.reg1);
@@ -311,6 +316,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		sreg4.setOnClickListener(set_reg_listener);
 		sreg5 = (Button) findViewById(R.id.reg5);
 		sreg5.setOnClickListener(set_reg_listener);
+		
 
 
 		// Setup the FrameLayout with the Camera Preview Screen
@@ -435,7 +441,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			Globals.HYSTERESIS = 0;
 		} else if (str.equals("Hysteresis_5")){
 			Globals.HYSTERESIS = 0.05;
-		} else if (str.equals("Hysteresis_15")){
+		} else if (str.equals("Hysteresis_10")){
 			Globals.HYSTERESIS = 0.1;
 		} else if (str.equals("Hysteresis_15")){
 			Globals.HYSTERESIS = 0.15;
@@ -445,6 +451,11 @@ public class CameraCloud extends Activity implements LocationListener {
 			Globals.HYSTERESIS = 0.25;
 		}
 	}
+	private OnClickListener hyst_show_listener = new OnClickListener(){
+		public void onClick(View v){
+			hystTv.setText("h " + Globals.HYSTERESIS);
+		}
+	};
 	
 	/**
 	 * onResume is is always called after onStart, even if userApp's not paused
@@ -962,7 +973,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		gpsTv.setText("gps "+current_region);
 
 		if (Globals.HYSTERESIS != 0){
-			logMsg("hasHysteresis = true");
+			logMsg("Hysteresis = " + Globals.HYSTERESIS);
 			double region_width_boundary = region_width*Globals.HYSTERESIS;
 			// check if it's inside boundary of region
 			// region_width_boundary is defined as the boundary from the edge of
@@ -984,7 +995,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				}
 			}
 		} else {
-			logMsg("hasHysteresis = false");
+			logMsg("Hysteresis is "+Globals.HYSTERESIS);
 			// check that prev region and new region are different
 			RegionKey new_region = new RegionKey((int) current_region, 0);
 			if (Math.abs(new_region.x - prevRegion.x) == 0) {

@@ -361,6 +361,12 @@
             android:layout_width="60dip"
             android:layout_height="match_parent"
             android:prompt="@string/spinner_prompt"/>
+        <Button
+            android:id="@+id/hyst_button"
+            android:layout_width="40dip"
+            android:layout_height="match_parent"
+            android:text="H show" />
+        
     </LinearLayout>
 
 </LinearLayout>
