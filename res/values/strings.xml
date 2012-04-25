@@ -2,9 +2,13 @@
 <resources>
     <string name="app_name">aaaCameraCloud</string>
     
-    <string name="spinner_prompt">Hysteresis</string>
+    <string name="spinner_prompt">Percentage of Width</string>
     <string-array name="spinner_choices">
-        <item>Hysteresis_ON</item>
-        <item>Hysteresis_OFF</item>
+        <item>Hysteresis_0</item>
+        <item>Hysteresis_5</item>
+        <item>Hysteresis_10</item>
+        <item>Hysteresis_15</item>
+        <item>Hysteresis_20</item>
+        <item>Hysteresis_25</item>
     </string-array>
 </resources>

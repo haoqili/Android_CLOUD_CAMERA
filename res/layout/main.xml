@@ -287,53 +287,46 @@
         </TextView>
     </LinearLayout>
     
-       <LinearLayout
+    <LinearLayout
         android:id="@+id/CountInfoLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
         <TextView
             style="@style/CloudText"
-            android:id="@+id/takeNum_tv"
+            android:id="@+id/take_tv"
+            android:layout_width="90dip"
+            android:layout_height="wrap_content"
+            android:text="t -/-=-%" >
+        </TextView>
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/get_tv"
+            android:layout_width="90dip"
+            android:layout_height="wrap_content"
+            android:text="g -/-=-%" >
+        </TextView>
+
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/width_tv"
             android:layout_width="50dip"
             android:layout_height="wrap_content"
-            android:text="t 0" >
+            android:text="w 20m" >
         </TextView>
         <TextView
             style="@style/CloudText"
-            android:id="@+id/takeGood_tv"
-            android:layout_width="60dip"
+            android:id="@+id/hyst_tv"
+            android:layout_width="40dip"
             android:layout_height="wrap_content"
-            android:text="t:) 0" >
+            android:text="h 0" >
         </TextView>
         <TextView
             style="@style/CloudText"
-            android:id="@+id/takePercent_tv"
-            android:layout_width="60dip"
-            android:layout_height="wrap_content"
-            android:text="t% 0" >
-        </TextView>
-        
-        <TextView
-            style="@style/CloudText"
-            android:id="@+id/getNum_tv"
+            android:id="@+id/gps_tv"
             android:layout_width="50dip"
             android:layout_height="wrap_content"
-            android:text="g 0" >
-        </TextView>
-        <TextView
-            style="@style/CloudText"
-            android:id="@+id/getGood_tv"
-            android:layout_width="60dip"
-            android:layout_height="wrap_content"
-            android:text="g:) 0" >
-        </TextView>
-        <TextView
-            style="@style/CloudText"
-            android:id="@+id/getPercent_tv"
-            android:layout_width="50dip"
-            android:layout_height="wrap_content"
-            android:text="g% 0" >
+            android:text="gps ?" >
         </TextView>
     </LinearLayout>
 

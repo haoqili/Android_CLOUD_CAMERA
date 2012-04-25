@@ -21,7 +21,7 @@ public final class R {
         public static final int CountInfoLayout=0x7f060021;
         public static final int PhotoDisplay=0x7f060002;
         public static final int RegionSet=0x7f060018;
-        public static final int SetParameters=0x7f06002b;
+        public static final int SetParameters=0x7f06002a;
         public static final int StatusHeadingLayout=0x7f060004;
         public static final int StatusInfoLayout=0x7f060009;
         public static final int TextView01=0x7f060007;
@@ -37,10 +37,10 @@ public final class R {
         public static final int get3_button=0x7f060015;
         public static final int get4_button=0x7f060016;
         public static final int get5_button=0x7f060017;
-        public static final int getGood_tv=0x7f060029;
-        public static final int getNum_tv=0x7f060028;
-        public static final int getPercent_tv=0x7f06002a;
-        public static final int hysteresis_spinner=0x7f06002e;
+        public static final int get_tv=0x7f060026;
+        public static final int gps_tv=0x7f060029;
+        public static final int hyst_tv=0x7f060028;
+        public static final int hysteresis_spinner=0x7f06002d;
         public static final int id_tv=0x7f06000c;
         public static final int leader_tv=0x7f06000d;
         public static final int msgList=0x7f060020;
@@ -56,11 +56,10 @@ public final class R {
         public static final int region_tv=0x7f06000b;
         public static final int state_tv=0x7f06000a;
         public static final int successcount_tv=0x7f060023;
-        public static final int takeGood_tv=0x7f060026;
-        public static final int takeNum_tv=0x7f060025;
-        public static final int takePercent_tv=0x7f060027;
-        public static final int width_button=0x7f06002d;
-        public static final int width_text=0x7f06002c;
+        public static final int take_tv=0x7f060025;
+        public static final int width_button=0x7f06002c;
+        public static final int width_text=0x7f06002b;
+        public static final int width_tv=0x7f060027;
     }
     public static final class layout {
         public static final int main=0x7f020000;

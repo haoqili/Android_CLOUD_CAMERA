@@ -89,8 +89,10 @@ public class CameraCloud extends Activity implements LocationListener {
 	TextView opCountTv, successCountTv, failureCountTv;
 	EditText widthText;
 	ListView msgList;
-	TextView takeNumTv, takeGoodTv, takePercentTv;
-	TextView getNumTv, getGoodTv, getPercentTv;
+	TextView takeTv, getTv;
+	TextView widthTv;
+	TextView hystTv;
+	TextView gpsTv;
 	TextView idTv, stateTv, regionTv, leaderTv;
 	ArrayAdapter<String> receivedMessages;
 	CameraSurfaceView cameraSurfaceView;
@@ -174,26 +176,31 @@ public class CameraCloud extends Activity implements LocationListener {
 	}
 
 	private void logCounts(){
-		logMsg("reg="+myRegion.x 
-				+ " regionWidth="+Globals.REGION_WIDTH + " hyst="+Globals.HASHYSTERESIS
-				+ "takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
-				+ " takeBad="+takeBad+ " takeException="+takeException+ " getNum="+getNum
-				+ " getGood="+getGood+ " getBad="+getBad+ " getException="+getException);
-		takeNumTv.setText("t " + takeNum);
-		takeGoodTv.setText("t:) " + takeGoodSave);
+		int tPercent = -1;
 		if (takeNum!=0){
 			double takePercent = 100.0*takeGoodSave / (1.0*takeNum);
-			int tPercent = (int) takePercent;
-			takePercentTv.setText("t% " + tPercent);
+			tPercent = (int) takePercent;
+			takeTv.setText("t " + takeGoodSave + "/" + takeNum + "=" + tPercent + "%");
+		} else {
+			takeTv.setText("t " + takeGoodSave + "/" + takeNum + "=-");
 		}
 		
-		getNumTv.setText("g " + getNum);
-		getGoodTv.setText("g:) " + getGood);
+		int gPercent = -1;
 		if (getNum!=0){
 			double getPercent = 100.0*getGood / (1.0*getNum);
-			int gPercent = (int) getPercent;
-			getPercentTv.setText("g% " + gPercent);
+			gPercent = (int) getPercent;
+			getTv.setText("g " + getGood + "/" + getNum + "=" + gPercent + "%");
+		} else {
+			getTv.setText("g " + getGood + "/" + getNum + "=-");
 		}
+		
+		logMsg("reg="+myRegion.x 
+				+ " regionWidth="+Globals.REGION_WIDTH + " hyst="+Globals.HYSTERESIS
+				+ "takeNum="+takeNum+ " takeCamGood="+takeCamGood+ " takeGoodSave="+takeGoodSave
+				+ " takeBad="+takeBad+ " takeException="+takeException+ " takePercent="+tPercent+"%"
+				
+				+ " getNum="+getNum+ " getGood="+getGood+ " getBad="+getBad
+				+ " getException="+getException+ " getPercent="+gPercent+"%");
 	
 	}
 	
@@ -274,6 +281,7 @@ public class CameraCloud extends Activity implements LocationListener {
 	            this, R.array.spinner_choices, android.R.layout.simple_spinner_item);
 	    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 	    spinner.setAdapter(adapter);
+	    spinner.setSelection(0);
 	    spinner.setOnItemSelectedListener(new HysteresisSpinnerListener());
 		
 		// Buttons
@@ -349,13 +357,13 @@ public class CameraCloud extends Activity implements LocationListener {
 		failureCountTv = (TextView) findViewById(R.id.failurecount_tv);
 		
 		// Text views
-		takeNumTv = (TextView) findViewById(R.id.takeNum_tv);
-		takeGoodTv = (TextView) findViewById(R.id.takeGood_tv);
-		takePercentTv = (TextView) findViewById(R.id.takePercent_tv);
-		getNumTv = (TextView) findViewById(R.id.getNum_tv);
-		getGoodTv = (TextView) findViewById(R.id.getGood_tv);
-		getPercentTv = (TextView) findViewById(R.id.getPercent_tv);
-
+		takeTv = (TextView) findViewById(R.id.take_tv);
+		getTv = (TextView) findViewById(R.id.get_tv);
+		
+		widthTv = (TextView) findViewById(R.id.width_tv);
+		hystTv = (TextView) findViewById(R.id.hyst_tv);
+		gpsTv = (TextView) findViewById(R.id.gps_tv);
+		
 		widthText = (EditText) findViewById(R.id.width_text);
 
 		// Text views
@@ -423,10 +431,18 @@ public class CameraCloud extends Activity implements LocationListener {
 	
 	// Called by HysteresisSpinnerListener
 	public static void changeHysteresis(String str){
-		if (str.equals("Hysteresis_ON")){
-			Globals.HASHYSTERESIS = true;
-		} else {
-			Globals.HASHYSTERESIS = false;
+		if (str.equals("Hysteresis_0")){
+			Globals.HYSTERESIS = 0;
+		} else if (str.equals("Hysteresis_5")){
+			Globals.HYSTERESIS = 0.05;
+		} else if (str.equals("Hysteresis_15")){
+			Globals.HYSTERESIS = 0.1;
+		} else if (str.equals("Hysteresis_15")){
+			Globals.HYSTERESIS = 0.15;
+		} else if (str.equals("Hysteresis_20")){
+			Globals.HYSTERESIS = 0.2;
+		} else if (str.equals("Hysteresis_25")){
+			Globals.HYSTERESIS = 0.25;
 		}
 	}
 	
@@ -498,6 +514,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			} else {
 				int rX = Integer.parseInt(strX);
 				Globals.REGION_WIDTH = rX;
+				widthTv.setText("w "+rX+"m");
 				logMsg("Region width is changed to: " + rX);
 			}
 		}
@@ -561,6 +578,7 @@ public class CameraCloud extends Activity implements LocationListener {
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras) {
 		logMsg("....... GPS status changed ....... ");
+		hystTv.setText("h "+Globals.HYSTERESIS);
 		switch (status) {
 		case LocationProvider.OUT_OF_SERVICE:
 			logMsg("GPS out of service");
@@ -941,10 +959,11 @@ public class CameraCloud extends Activity implements LocationListener {
 		double current_region = (int) Math.floor(loc_x_rotated / region_width);
 		logMsg("location PINPOINTS to region = " + current_region
 				+ ", previous " + prevRegion.x);
+		gpsTv.setText("gps "+current_region);
 
-		if (Globals.HASHYSTERESIS){
+		if (Globals.HYSTERESIS != 0){
 			logMsg("hasHysteresis = true");
-			double region_width_boundary = region_width*0.1;
+			double region_width_boundary = region_width*Globals.HYSTERESIS;
 			// check if it's inside boundary of region
 			// region_width_boundary is defined as the boundary from the edge of
 			// region to edge of boundary

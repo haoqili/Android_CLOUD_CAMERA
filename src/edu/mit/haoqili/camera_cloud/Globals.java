@@ -19,9 +19,9 @@ public class Globals {
 		// region calculations
         // 21 meters is the max linearly on 77 Mass Ave, 
         // ideally we want REGION_WIDTH to span 2 regions, but 10.5 meters is too short
-        static public double REGION_WIDTH=21; // This can be changed from UI
+        static public double REGION_WIDTH=20; // This can be changed from UI
 		final static public double ROAD_WIDTH_METERS = 30;
-		static public boolean HASHYSTERESIS = false; // can be changed from UI 
+		static public double HYSTERESIS = 0; // can be changed from UI 
 		
 		// to calculate start point & road angle:
 		// Endpoints on (straight) Mass Ave to calculate theta
