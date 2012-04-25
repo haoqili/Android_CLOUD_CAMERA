@@ -187,7 +187,7 @@
     <LinearLayout
         android:id="@+id/RegionSet"
         android:layout_width="fill_parent"
-        android:layout_height="20dip"
+        android:layout_height="40dip"
         android:orientation="horizontal">
 
         <Button
@@ -201,7 +201,7 @@
     <LinearLayout
         android:id="@+id/RegionSet"
         android:layout_width="fill_parent"
-        android:layout_height="40dip"
+        android:layout_height="20dip"
         android:orientation="horizontal">
 
         <Button
