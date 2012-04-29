@@ -21,8 +21,6 @@ regions = dict()
 
 CR_ERROR = 13
 CR_OKAY = 12
-CR_NOCSM = 11
-CR_CSM = 10
 CR_NO_PHOTO = 20
 
 @app.route('/')
@@ -40,26 +38,20 @@ def client_upload_photo(x, y):
     if request.method == 'POST':
         print "request from "+ str(x) + ", " + str(y)
         # require region to exist and only allow current leader to modify
-        print "'photo_bytes' is: ..." + str(request.json["photo_bytes"])
-
         if not (x,y) in regions.keys():
             print "make new region"
             # make new key (x, y) and set it to photo_bytes array
             regions[(x,y)] = [request.json["photo_bytes"]]
-            print "RETURN OKAY :D:D:D:D"
-            print "Regions is now like: "
-            print regions
+            print "Save photo successful :D:D:D:D"
             return jsonify({'status': CR_OKAY})
         else:
-            print "append to current array"
+            print "got new photo, replace the old photo"
             # TODO: if ever save multiple photos, change back
             # append to current array
             #regions[(x,y)].append(request.json["photo_bytes"])
             # set to first of array (ONLY SAVING ONE)
             regions[(x,y)][0] = request.json["photo_bytes"]
-            print "RETURN OKAY :D:D:D:D"
-            print "Regions is now like: "
-            print regions
+            print "Save photo successful :D:D:D:D"
             return jsonify({'status': CR_OKAY})
     else:
         print "request method not POST :(:(:(:("
@@ -80,8 +72,7 @@ def client_download_photo(x, y):
             print "Requested region IN dictinary"
             # retrieve last element of  photo_bytes array, 
             # i.e. newest photo of this region
-            print "about te return 'photo_bytes' with data: "
-            print regions[(x,y)][-1]
+            print "about to return 'photo_bytes' with the latest photo "
             return jsonify({'photo_bytes': regions[(x,y)][-1]})
     else:
         print 'request method not POST'

@@ -125,13 +125,6 @@
             android:text="none" />
 
         <Button
-            android:id="@+id/get0_button"
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="Reg 0 Get" />
-        
-        <Button
             android:id="@+id/get1_button"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
@@ -139,13 +132,21 @@
             android:text="Reg 1 Get" />
         
         <Button
-            android:id="@+id/get2_button"
+            android:id="@+id/get3_button"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
-            android:text="Reg 2 Get!" />
+            android:text="Reg 3 Get!" />
+                
+        <Button
+            android:id="@+id/get5_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 5 Get" />
+        
     </LinearLayout>
-
+    
     <LinearLayout
         android:id="@+id/CameraLaunch2"
         android:layout_width="fill_parent"
@@ -158,13 +159,20 @@
             android:layout_height="50dip"
             android:padding="2dp"
             android:text="Take Pic" />
-        
+
         <Button
-            android:id="@+id/get3_button"
+            android:id="@+id/get0_button"
             android:layout_width="80dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
-            android:text="Reg 3 Get" />
+            android:text="Reg 0 Get" />
+                
+        <Button
+            android:id="@+id/get2_button"
+            android:layout_width="80dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="Reg 2 Get" />
         
         <Button
             android:id="@+id/get4_button"
@@ -173,14 +181,6 @@
             android:padding="2dp"
             android:text="Reg 4 Get" />
         
-        <Button
-            android:id="@+id/get5_button"
-            android:layout_width="80dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="Reg 5 Get" />
-        
-
     </LinearLayout>
 
     <!-- space holder -->
@@ -199,52 +199,59 @@
     </LinearLayout>
     
     <LinearLayout
-        android:id="@+id/RegionSet"
+        android:id="@+id/RegionSet2"
         android:layout_width="fill_parent"
-        android:layout_height="20dip"
+        android:layout_height="40dip"
+        android:orientation="horizontal">
+        
+        <Button
+            android:id="@+id/reg1"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="1" />
+        
+        <Button
+            android:id="@+id/reg3"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="3" />
+        
+        <Button
+            android:id="@+id/reg5"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:padding="2dp"
+            android:text="5" />
+        
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/RegionSet3"
+        android:layout_width="fill_parent"
+        android:layout_height="40dip"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/reg0"
-            android:layout_width="60dip"
+            android:layout_width="100dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:text="0" />
-        
-        <Button
-            android:id="@+id/reg1"
-            android:layout_width="60dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="1" />
 
         <Button
             android:id="@+id/reg2"
-            android:layout_width="60dip"
+            android:layout_width="100dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:text="2" />
-        
-        <Button
-            android:id="@+id/reg3"
-            android:layout_width="60dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="3" />
                 
         <Button
             android:id="@+id/reg4"
-            android:layout_width="60dip"
+            android:layout_width="100dip"
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:text="4" />
-        
-        <Button
-            android:id="@+id/reg5"
-            android:layout_width="60dip"
-            android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="5" />
         
     </LinearLayout>
     

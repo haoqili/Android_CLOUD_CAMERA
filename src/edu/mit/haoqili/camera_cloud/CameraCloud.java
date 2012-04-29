@@ -344,6 +344,7 @@ public class CameraCloud extends Activity implements LocationListener {
 					// uploadTimeoutPeriod);
 					
 					takeNum += 1;
+					logMsg("cloud one more takeNum: "+takeNum);
 					logCounts();
 
 					logMsg("** Clicked take picture button **");
@@ -615,6 +616,7 @@ public class CameraCloud extends Activity implements LocationListener {
 			logMsg("inside HandlePictureStorage onPictureTaken()");
 
 			takeCamGood += 1;
+			logMsg("cloud one more takeCamGood: " + takeCamGood);
 			logCounts();
 			
 			// let the preview work again
@@ -674,6 +676,7 @@ public class CameraCloud extends Activity implements LocationListener {
 					// count it
 					isSaveSuccess = true;
 					takeGoodSave += 1; // add here in case things screw up later
+					logMsg("cloud one more takeGoodSave: "+takeGoodSave);
 					logCounts();
 					
 					logMsg("SUCCESS! Client now knows saving photo on cloud server succeeded");
@@ -707,6 +710,7 @@ public class CameraCloud extends Activity implements LocationListener {
 		if (!isSaveSuccess){
 			// the difference of takeBad - takeException = successful replies but bad
 			takeBad += 1; // ANIRUDH: Ok it's incremented here. 
+			logMsg("cloud one more takeBad: "+takeBad);
 			logCounts();
 			logMsg("takeBad++");
 		}
@@ -759,6 +763,7 @@ public class CameraCloud extends Activity implements LocationListener {
 						"Processing photo get or save to cloud server... :)");
 
         		getNum +=1;
+        		logMsg("cloud one more getNum: "+getNum);
         		logCounts();
         		
         		boolean isGetSuccess = false;
@@ -836,6 +841,7 @@ public class CameraCloud extends Activity implements LocationListener {
 							
 							isGetSuccess = true;
 							getGood += 1;
+							logMsg("cloud one more getGood: "+getGood);
 							logCounts();
 							
 							ImageView image = (ImageView) findViewById(R.id.photoResultView);
@@ -872,6 +878,7 @@ public class CameraCloud extends Activity implements LocationListener {
 				if (!isGetSuccess){
 					// the difference of getBad - getException = successful replies but bad
 					getBad += 1;
+					logMsg("cloud one more getBad: "+getBad);
 					logCounts();
 					logMsg("getBad++");
 				}
@@ -1138,8 +1145,10 @@ public class CameraCloud extends Activity implements LocationListener {
 				toast.show();
 				if (client_req_int == CLIENT_UPLOAD_PHOTO) {
 					takeException += 1;
+					logMsg("cloud one more takeException: " + takeException);
 				} else { // CLIENT_DOWNLOAD_PHOTO
 					getException += 1;
+					logMsg("cloud one more getException: " + getException);
 				}
 				logCounts();
 				
