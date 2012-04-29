@@ -117,7 +117,7 @@ public class CameraCloud extends Activity implements LocationListener {
 	private int getNum = 0; // # of times pressed "Get x Region"
 	private int getGood = 0; // # get success
 	// the difference of getBad - getException = successful replies but bad
-	private int getBad = 0; // # get failure
+	private int getBad = 0; // # get failure, region doesn't have picture/no region
 	private int getException = 0;
 
 
