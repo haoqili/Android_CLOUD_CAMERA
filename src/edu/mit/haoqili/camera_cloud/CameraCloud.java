@@ -408,7 +408,7 @@ public class CameraCloud extends Activity implements LocationListener {
 
 		if (mExternalStorageAvailable && mExternalStorageWriteable) {
 			myLogFile = new File(Environment.getExternalStorageDirectory(),
-					String.format("csm-%d.txt", System.currentTimeMillis()));
+					String.format("0506-%d.txt", System.currentTimeMillis()));
 			try {
 				myLogWriter = new PrintWriter(myLogFile);
 				logMsg("*** Opened log file for writing ***");
