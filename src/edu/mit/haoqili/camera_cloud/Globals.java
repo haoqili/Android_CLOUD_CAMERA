@@ -10,7 +10,7 @@ public class Globals {
 		final static public int JPEG_SAMPLE_SIZE = 12; // if too low, will cause Nexus S out of memory!
 
 		// cloud server
-    	final static public String CLOUD_SERVER_NAME="18.111.2.113:8213";
+    	final static public String CLOUD_SERVER_NAME="18.111.1.239:8213";
     
     	// timeout stuff
     	final static public int TIMEOUTCONNECTION = 60000;

@@ -338,6 +338,27 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/LatencyStuff"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/take_latency"
+            android:layout_width="190dip"
+            android:layout_height="wrap_content"
+            android:text="tmn: -, tmd: -, tn: -" >
+        </TextView>
+        <TextView
+            style="@style/CloudText"
+            android:id="@+id/get_latency"
+            android:layout_width="190dip"
+            android:layout_height="wrap_content"
+            android:text="gmn: -, gmd: -, gn: -" >
+        </TextView>
+    </LinearLayout>
+    
+    <LinearLayout
         android:id="@+id/SetParameters"
         android:layout_width="fill_parent"
         android:layout_height="40dip"

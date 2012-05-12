@@ -8,6 +8,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -96,6 +98,7 @@ public class CameraCloud extends Activity implements LocationListener {
 	TextView hystTv;
 	TextView gpsTv;
 	TextView idTv, stateTv, regionTv, leaderTv;
+	TextView takelatencyTv, getlatencyTv;
 	ArrayAdapter<String> receivedMessages;
 	CameraSurfaceView cameraSurfaceView;
 	Spinner spinner;
@@ -142,6 +145,10 @@ public class CameraCloud extends Activity implements LocationListener {
 	// for camera client
 	final static int CLIENT_UPLOAD_PHOTO = 101;
 	final static int CLIENT_DOWNLOAD_PHOTO = 102;
+	
+	// latency stuff
+	private ArrayList<Long> takelatencies = null;
+	private ArrayList<Long> getlatencies = null;
 
 	/** Handle messages from various components */
 	private final Handler myHandler = new Handler() {
@@ -175,6 +182,39 @@ public class CameraCloud extends Activity implements LocationListener {
 			myLogWriter.println(msg);
 			myLogWriter.flush();
 		}
+	}
+	
+	private void logTakeLatency(long latency){
+		takelatencies.add(latency);
+		Collections.sort(takelatencies);
+		
+		int len = takelatencies.size();
+		long median = takelatencies.get(len/2);
+		
+		// mean
+		long sum = 0;
+		for (int i=0; i < len; i++){
+			sum += takelatencies.get(i);
+		}
+		long mean = sum/len;
+		
+		takelatencyTv.setText("tmn: "+mean+ ", tmd: "+median+ " tn: "+latency);
+	}
+	private void logGetLatency(long latency){
+		getlatencies.add(latency);
+		Collections.sort(getlatencies);
+		
+		int len = getlatencies.size();
+		long median = getlatencies.get(len/2);
+		
+		// mean
+		long sum = 0;
+		for (int i=0; i < len; i++){
+			sum += getlatencies.get(i);
+		}
+		long mean = sum/len;
+		
+		getlatencyTv.setText("gmn: "+mean+ ", gmd: "+median+ " gn: "+latency);
 	}
 
 	private void logCounts(){
@@ -367,6 +407,9 @@ public class CameraCloud extends Activity implements LocationListener {
 		takeTv = (TextView) findViewById(R.id.take_tv);
 		getTv = (TextView) findViewById(R.id.get_tv);
 		
+		takelatencyTv = (TextView) findViewById(R.id.take_latency);
+		getlatencyTv = (TextView) findViewById(R.id.get_latency);
+		
 		widthTv = (TextView) findViewById(R.id.width_tv);
 		hystTv = (TextView) findViewById(R.id.hyst_tv);
 		gpsTv = (TextView) findViewById(R.id.gps_tv);
@@ -408,7 +451,7 @@ public class CameraCloud extends Activity implements LocationListener {
 
 		if (mExternalStorageAvailable && mExternalStorageWriteable) {
 			myLogFile = new File(Environment.getExternalStorageDirectory(),
-					String.format("0506-%d.txt", System.currentTimeMillis()));
+					String.format("csm_cld0512-%d.txt", System.currentTimeMillis()));
 			try {
 				myLogWriter = new PrintWriter(myLogFile);
 				logMsg("*** Opened log file for writing ***");
@@ -431,6 +474,10 @@ public class CameraCloud extends Activity implements LocationListener {
 		// enable button pressing
 		areButtonsEnabled = true;
 		logMsg("areButtonsEnabled --> true");
+		
+		// Initialize ArrayLists
+		takelatencies = new ArrayList<Long>();
+		getlatencies = new ArrayList<Long>();
 
 		logMsg("*** Application started ***");
 
@@ -1078,10 +1125,13 @@ public class CameraCloud extends Activity implements LocationListener {
 				response = httpclient.execute(httpost);
 
 				long stopTime = System.currentTimeMillis();
+				long latency = stopTime - startTime;
 				if (client_req_int == CLIENT_UPLOAD_PHOTO) {
-					logMsg(String.format("CameraCloud Execute HTTP Upload latency: %dms", stopTime - startTime));
+					logMsg(String.format("CameraCloud Execute HTTP Upload latency: %dms", latency));
+					logTakeLatency(latency);
 				} else { // CLIENT_DOWNLOAD_PHOTO
-					logMsg(String.format("CameraCloud Execute HTTP Download latency: %dms", stopTime - startTime));
+					logMsg(String.format("CameraCloud Execute HTTP Download latency: %dms", latency));
+					logGetLatency(latency);
 				}
 					
 				logMsg("finished executing HTTP POST, get data");
